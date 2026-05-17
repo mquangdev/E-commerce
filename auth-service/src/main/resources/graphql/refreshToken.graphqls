@@ -1,0 +1,13 @@
+type RefreshToken {
+    id: ID!
+    token: String!
+    deviceId: String!
+    isRevoked: Boolean!
+    expiresAt: String!
+    createdAt: String!
+    user: User
+}
+
+extend type Query {
+    getRefreshTokenByToken(token: String!): RefreshToken
+}

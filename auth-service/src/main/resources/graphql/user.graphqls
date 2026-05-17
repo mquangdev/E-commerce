@@ -1,0 +1,14 @@
+type User {
+    id: ID!
+    username: String!
+    email: String!
+    status: String!
+    createdAt: String!
+    updatedAt: String!
+    roles: [Role]
+}
+
+extend type Query {
+    getUserById(id: ID!): User
+    getAllUsers: [User]
+}
