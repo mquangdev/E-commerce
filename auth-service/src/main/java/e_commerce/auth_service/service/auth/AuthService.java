@@ -6,11 +6,14 @@ import e_commerce.auth_service.dto.response.AuthResponseInternal;
 import e_commerce.auth_service.entity.RefreshTokenEntity;
 import e_commerce.auth_service.entity.UserEntity;
 import e_commerce.auth_service.enums.UserStatus;
+import e_commerce.auth_service.exception.AuthException;
 import e_commerce.auth_service.repository.refreshToken.RefreshTokenRepository;
 import e_commerce.auth_service.repository.user.UserRepository;
 import e_commerce.auth_service.service.jwt.JwtService;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
+import jakarta.servlet.http.Cookie;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -31,7 +34,6 @@ public class AuthService {
 
   public UUID register(RegisterRequest request) {
     // 1. Tạo đối tượng User từ request
-
     var userId = UUID.randomUUID();
 
     var user =
@@ -85,6 +87,81 @@ public class AuthService {
     // 5. Tạo accessToken
     var accessToken = jwtService.generateToken(user);
 
-    return AuthResponseInternal.builder().accessToken(accessToken).refreshToken(refreshToken).build();
+    return AuthResponseInternal.builder()
+        .accessToken(accessToken)
+        .refreshToken(refreshToken)
+        .build();
+  }
+
+  public AuthResponseInternal refreshToken(String refreshTokenValue) {
+    if (refreshTokenValue == null || refreshTokenValue.isEmpty()) {
+      throw new AuthException("Không tìm thấy Refresh Token trong Cookie.");
+    }
+
+    UUID tokenUUID;
+    try {
+      tokenUUID = UUID.fromString(refreshTokenValue);
+    } catch (IllegalArgumentException e) {
+      throw new AuthException("Định dạng Refresh Token không hợp lệ.");
+    }
+
+    //  1. Tìm refresh token trong DB
+    Optional<RefreshTokenEntity> refreshTokenEntityOptional =
+        refreshTokenRepository.findByToken(tokenUUID);
+    if (refreshTokenEntityOptional.isEmpty()) {
+      throw new AuthException("Refresh Token không tồn tại.");
+    }
+    RefreshTokenEntity refreshTokenEntity = refreshTokenEntityOptional.get();
+    var user = refreshTokenEntity.getUser();
+
+    // 2. Case b. Token đã bị thu hồi (nghi ngờ bị lộ) -> Thu hồi tất cả token của user đó
+    if (refreshTokenEntity.isRevoked()) {
+      refreshTokenRepository.revokeAllTokenByUser(user);
+      throw new AuthException(
+          "Refresh Token đã bị thu hồi. Tất cả token của bạn đã bị thu hồi vì lý do bảo mật. Vui lòng đăng nhập lại.");
+    }
+
+    // 3. Case a. Token hết hạn
+    if (refreshTokenEntity.getExpiresAt().isBefore(LocalDateTime.now())) {
+      refreshTokenEntity.setRevoked(true);
+      refreshTokenRepository.save(refreshTokenEntity);
+      throw new AuthException("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
+    }
+
+    // 4. Case c. Hợp lệ -> Thu hồi token hiện tại (xoay vòng token)
+    refreshTokenEntity.setRevoked(true);
+    refreshTokenRepository.save(refreshTokenEntity);
+
+    // 5. Sinh cặp token mới
+    var newRefreshTokenUuid = UUID.randomUUID();
+    var newRefreshTokenEntity =
+        RefreshTokenEntity.builder()
+            .id(UUID.randomUUID())
+            .user(user)
+            .token(newRefreshTokenUuid)
+            .deviceId(
+                refreshTokenEntity
+                    .getDeviceId()) // Kế thừa deviceId từ token cũ (hoặc có thể truyền deviceId
+            // xuống)
+            .isRevoked(false)
+            .expiresAt(LocalDateTime.now().plusDays(7))
+            .build();
+    refreshTokenRepository.save(newRefreshTokenEntity);
+
+    var newAccessToken = jwtService.generateToken(user);
+
+    return AuthResponseInternal.builder()
+        .accessToken(newAccessToken)
+        .refreshToken(newRefreshTokenUuid)
+        .build();
+  }
+
+  public Cookie createRefreshTokenCookie(String refreshToken) {
+    Cookie cookie = new Cookie("refreshToken", refreshToken);
+    cookie.setHttpOnly(true); // 🛡️ Chống XSS (JavaScript không đọc được)
+    cookie.setSecure(true); // Chỉ gửi qua HTTPS (trên môi trường thật)
+    cookie.setPath("/api/v1/auth/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setMaxAge(7 * 24 * 60 * 60); // Sống 7 ngày
+    return cookie;
   }
 }

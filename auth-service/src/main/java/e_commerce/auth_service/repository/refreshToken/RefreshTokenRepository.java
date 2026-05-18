@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity, UUID> {
 
-  Optional<RefreshTokenEntity> findByToken(String token);
+  Optional<RefreshTokenEntity> findByToken(UUID token);
 
   Optional<RefreshTokenEntity> findByUserAndDeviceIdAndIsRevokedFalse(
       UserEntity user, String deviceId);
@@ -23,9 +23,9 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
   @Modifying
   @Transactional
   @Query(
-      value = "DELETE FROM refresh_tokens WHERE expires_at < CURRENT_TIMESTAMP",
-      nativeQuery = true)
-  void deleteExpiredTokens();
+      value =
+          "UPDATE RefreshTokenEntity r SET r.isRevoked = true WHERE r.user = :user AND r.isRevoked = false")
+  void revokeAllTokenByUser(UserEntity user);
 
   default void cleanAndSaveNewToken(RefreshTokenEntity newToken, UserEntity user) {
     deleteByUser(user);
