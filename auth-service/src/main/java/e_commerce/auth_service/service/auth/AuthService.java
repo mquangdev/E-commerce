@@ -10,10 +10,10 @@ import e_commerce.auth_service.exception.AuthException;
 import e_commerce.auth_service.repository.refreshToken.RefreshTokenRepository;
 import e_commerce.auth_service.repository.user.UserRepository;
 import e_commerce.auth_service.service.jwt.JwtService;
+import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.UUID;
-import jakarta.servlet.http.Cookie;
 import lombok.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -36,7 +36,7 @@ public class AuthService {
     // 1. Tạo đối tượng User từ request
     var userId = UUID.randomUUID();
 
-    var user =
+    UserEntity user =
         UserEntity.builder()
             .id(userId)
             .username(request.getUsername())
@@ -160,8 +160,43 @@ public class AuthService {
     Cookie cookie = new Cookie("refreshToken", refreshToken);
     cookie.setHttpOnly(true); // 🛡️ Chống XSS (JavaScript không đọc được)
     cookie.setSecure(true); // Chỉ gửi qua HTTPS (trên môi trường thật)
-    cookie.setPath("/api/v1/auth/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setPath(
+        "/api/v1/auth/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
     cookie.setMaxAge(7 * 24 * 60 * 60); // Sống 7 ngày
     return cookie;
+  }
+
+  public Cookie deleteRefreshTokenCookie() {
+    Cookie cookie = new Cookie("refreshToken", "");
+    cookie.setHttpOnly(true); // 🛡️ Chống XSS (JavaScript không đọc được)
+    cookie.setSecure(true); // Chỉ gửi qua HTTPS (trên môi trường thật)
+    cookie.setPath(
+        "/api/v1/auth/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setMaxAge(7 * 24 * 60 * 60); // Sống 0 giây = Xóa ngay lập tức
+
+    return cookie;
+  }
+
+  public void logout(String refreshTokenValue, String deviceId) {
+    if (refreshTokenValue == null || refreshTokenValue.isEmpty()) {
+      throw new AuthException("Không tìm thấy token để đăng xuất.");
+    }
+
+    UUID tokenUuid = UUID.fromString(refreshTokenValue);
+
+    // 1. Tìm đúng token đang hoạt động của thiết bị này
+    RefreshTokenEntity refreshTokenEntity =
+        refreshTokenRepository
+            .findByToken(tokenUuid)
+            .orElseThrow(() -> new AuthException("Phiên đăng nhập không tồn tại."));
+
+    // 2. Kiểm tra tính chính chủ của thiết bị để tránh lỗi bảo mật
+    if (!refreshTokenEntity.getDeviceId().equals(deviceId)) {
+      throw new AuthException("Thiết bị yêu cầu đăng xuất không hợp lệ.");
+    }
+
+    // 3. Tiến hành thu hồi
+    refreshTokenEntity.setRevoked(true);
+    refreshTokenRepository.save(refreshTokenEntity);
   }
 }

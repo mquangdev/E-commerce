@@ -1,98 +1,123 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <databaseChangeLog
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
-        xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
     http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
 
-    <changeSet id="20240516-1" author="antigravity">
-        <!-- Users Table -->
-        <createTable tableName="users">
-            <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="username" type="VARCHAR(50)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="email" type="VARCHAR(100)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="password_hash" type="VARCHAR(255)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="status" type="VARCHAR(20)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
-                <constraints nullable="false"/>
-            </column>
-            <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+  <changeSet id="20240516-1" author="antigravity">
+    <!-- Users Table -->
+    <createTable tableName="users">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="username" type="VARCHAR(50)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="email" type="VARCHAR(100)">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="password_hash" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="status" type="VARCHAR(20)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
 
-        <!-- Roles Table -->
-        <createTable tableName="roles">
-            <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="name" type="VARCHAR(50)">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="description" type="VARCHAR(255)"/>
-        </createTable>
+    <!-- Roles Table -->
+    <createTable tableName="roles">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="name" type="VARCHAR(50)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="description" type="VARCHAR(255)"/>
+      <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
 
-        <!-- User Roles Table (Many-to-Many Join Table) -->
-        <createTable tableName="user_roles">
-            <column name="user_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="role_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+    <sql dbms="postgresql">
+      CREATE UNIQUE INDEX idx_roles_name_unique_active
+      ON roles (name)
+      WHERE is_deleted = false;
+    </sql>
 
-        <addPrimaryKey tableName="user_roles" columnNames="user_id, role_id" constraintName="pk_user_roles"/>
+    <!-- User Roles Table (Many-to-Many Join Table) -->
+    <createTable tableName="user_roles">
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="role_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
 
-        <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="user_id"
-                                 constraintName="fk_user_roles_user"
-                                 referencedTableName="users" referencedColumnNames="id"
-                                 onDelete="CASCADE"/>
+    <addPrimaryKey tableName="user_roles" columnNames="user_id, role_id"
+      constraintName="pk_user_roles"/>
 
-        <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="role_id"
-                                 constraintName="fk_user_roles_role"
-                                 referencedTableName="roles" referencedColumnNames="id"
-                                 onDelete="CASCADE"/>
+    <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="user_id"
+      constraintName="fk_user_roles_user"
+      referencedTableName="users" referencedColumnNames="id"
+      onDelete="CASCADE"/>
 
-        <!-- Refresh Tokens Table -->
-        <createTable tableName="refresh_tokens">
-            <column name="id" type="UUID">
-                <constraints primaryKey="true" nullable="false"/>
-            </column>
-            <column name="user_id" type="UUID">
-                <constraints nullable="false"/>
-            </column>
-            <column name="token" type="UUID">
-                <constraints nullable="false" unique="true"/>
-            </column>
-            <column name="device_id" type="VARCHAR(100)">
-                <constraints nullable="false"/>
-            </column>
-            <column name="is_revoked" type="BOOLEAN" defaultValueBoolean="false">
-                <constraints nullable="false"/>
-            </column>
-            <column name="expires_at" type="TIMESTAMP">
-                <constraints nullable="false"/>
-            </column>
-            <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
-                <constraints nullable="false"/>
-            </column>
-        </createTable>
+    <addForeignKeyConstraint baseTableName="user_roles" baseColumnNames="role_id"
+      constraintName="fk_user_roles_role"
+      referencedTableName="roles" referencedColumnNames="id"
+      onDelete="CASCADE"/>
 
-        <addForeignKeyConstraint baseTableName="refresh_tokens" baseColumnNames="user_id"
-                                 constraintName="fk_refresh_tokens_user"
-                                 referencedTableName="users" referencedColumnNames="id"
-                                 onDelete="CASCADE"/>
-    </changeSet>
+    <!-- Refresh Tokens Table -->
+    <createTable tableName="refresh_tokens">
+      <column name="id" type="UUID">
+        <constraints primaryKey="true" nullable="false"/>
+      </column>
+      <column name="user_id" type="UUID">
+        <constraints nullable="false"/>
+      </column>
+      <column name="token" type="UUID">
+        <constraints nullable="false" unique="true"/>
+      </column>
+      <column name="device_id" type="VARCHAR(100)">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_revoked" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+      <column name="expires_at" type="TIMESTAMP">
+        <constraints nullable="false"/>
+      </column>
+      <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+        <constraints nullable="false"/>
+      </column>
+      <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
+        <constraints nullable="false"/>
+      </column>
+    </createTable>
+
+    <addForeignKeyConstraint baseTableName="refresh_tokens" baseColumnNames="user_id"
+      constraintName="fk_refresh_tokens_user"
+      referencedTableName="users" referencedColumnNames="id"
+      onDelete="CASCADE"/>
+  </changeSet>
 
 </databaseChangeLog>

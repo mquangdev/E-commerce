@@ -4,7 +4,9 @@ import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 
 @Entity
 @Table(name = "refresh_tokens")
@@ -12,8 +14,10 @@ import org.hibernate.annotations.CreationTimestamp;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class RefreshTokenEntity {
+@SuperBuilder
+@SQLRestriction("is_deleted = false")
+@SQLDelete(sql = "UPDATE refresh_tokens SET is_deleted = true WHERE id = ?")
+public class RefreshTokenEntity extends BaseEntity {
 
   @Id private UUID id;
 
@@ -32,8 +36,4 @@ public class RefreshTokenEntity {
 
   @Column(name = "expires_at", nullable = false)
   private LocalDateTime expiresAt;
-
-  @CreationTimestamp
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
 }

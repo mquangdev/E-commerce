@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -49,12 +50,30 @@ public class AuthController {
     AuthResponseInternal refreshResult = authService.refreshToken(refreshToken);
 
     // 1. Tạo Cookie chứa Refresh Token
-    Cookie cookie = authService.createRefreshTokenCookie(refreshResult.getRefreshToken().toString());
+    Cookie cookie =
+        authService.createRefreshTokenCookie(refreshResult.getRefreshToken().toString());
 
     // 2. Gắn Cookie vào Response gửi về Client
     response.addCookie(cookie);
 
     // 3. Chỉ trả về Access Token trong Body JSON
     return ResponseEntity.ok(refreshResult.getAccessToken());
+  }
+
+  @PostMapping("/logout")
+  public ResponseEntity<String> logout(
+      @CookieValue(name = "refreshToken", required = false) String refreshToken,
+      @RequestParam String deviceId, // Hoặc truyền qua Body DTO tùy bạn thiết kế
+      HttpServletResponse response) {
+    // 1. Gọi Service để thu hồi token dưới DB
+    authService.logout(refreshToken, deviceId);
+
+    // 2. Tạo "Cookie xóa" với maxAge = 0
+    Cookie cookie = authService.deleteRefreshTokenCookie();
+
+    // 3. Gắn Cookie vào Response gửi về Client
+    response.addCookie(cookie);
+
+    return ResponseEntity.ok("Đăng xuất thành công!");
   }
 }

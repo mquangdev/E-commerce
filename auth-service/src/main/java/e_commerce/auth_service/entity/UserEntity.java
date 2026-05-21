@@ -2,11 +2,11 @@ package e_commerce.auth_service.entity;
 
 import e_commerce.auth_service.enums.UserStatus;
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
 import java.util.*;
 import lombok.*;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
+import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.SQLRestriction;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
@@ -16,8 +16,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class UserEntity implements UserDetails {
+@SuperBuilder
+@SQLRestriction("is_deleted = false")
+@SQLDelete(sql = "UPDATE users SET is_deleted = true WHERE id = ?")
+public class UserEntity extends BaseEntity implements UserDetails {
 
   @Id private UUID id;
 
@@ -33,14 +35,6 @@ public class UserEntity implements UserDetails {
   @Column(nullable = false, length = 20)
   @Enumerated(EnumType.STRING)
   private UserStatus status;
-
-  @CreationTimestamp
-  @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
-
-  @UpdateTimestamp
-  @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
 
   @ManyToMany(fetch = FetchType.EAGER)
   @JoinTable(
