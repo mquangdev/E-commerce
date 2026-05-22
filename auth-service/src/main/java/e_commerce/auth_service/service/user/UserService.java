@@ -4,6 +4,9 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import e_commerce.auth_service.dto.response.PageResponse;
 
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -34,6 +37,23 @@ public class UserService implements UserDetailsService {
   public UserEntity getUserById(UUID id) {
     return userRepository.findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User với ID: " + id));
+  }
+
+  public UserResponse getUserResponseById(UUID id) {
+    return mapToResponse(getUserById(id));
+  }
+
+  public PageResponse<UserResponse> getAllUsers(int page, int size) {
+    Page<UserEntity> userPage = userRepository.findAll(PageRequest.of(page, size));
+    List<UserResponse> userResponses = userPage.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+
+    return PageResponse.<UserResponse>builder()
+        .data(userResponses)
+        .totalElements(userPage.getTotalElements())
+        .totalPages(userPage.getTotalPages())
+        .build();
   }
 
   public UserResponse createUser(CreateUserRequest request) {

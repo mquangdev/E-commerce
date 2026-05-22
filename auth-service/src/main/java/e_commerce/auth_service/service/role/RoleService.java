@@ -6,6 +6,11 @@ import e_commerce.auth_service.exception.ResourceAlreadyExistsException;
 import e_commerce.auth_service.exception.ResourceNotFoundException;
 import e_commerce.auth_service.repository.role.RoleRepository;
 import java.util.UUID;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import e_commerce.auth_service.dto.response.PageResponse;
+import java.util.List;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -19,6 +24,23 @@ public class RoleService {
     return roleRepository
         .findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy Role với ID: " + id));
+  }
+
+  public RoleResponse getRoleResponseById(UUID id) {
+    return mapToResponse(getRoleById(id));
+  }
+
+  public PageResponse<RoleResponse> getAllRoles(int page, int size) {
+    Page<RoleEntity> rolePage = roleRepository.findAll(PageRequest.of(page, size));
+    List<RoleResponse> roleResponses = rolePage.getContent().stream()
+        .map(this::mapToResponse)
+        .collect(Collectors.toList());
+
+    return PageResponse.<RoleResponse>builder()
+        .data(roleResponses)
+        .totalElements(rolePage.getTotalElements())
+        .totalPages(rolePage.getTotalPages())
+        .build();
   }
 
   public RoleResponse createRole(e_commerce.auth_service.dto.request.CreateRoleRequest request) {

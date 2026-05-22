@@ -4,7 +4,13 @@ type Role {
     description: String
 }
 
+type RolePage {
+    data: [Role]
+    totalElements: Int
+    totalPages: Int
+}
+
 extend type Query {
     getRoleById(id: ID!): Role
-    getAllRoles: [Role]
+    getAllRoles(page: Int = 0, size: Int = 10): RolePage
 }

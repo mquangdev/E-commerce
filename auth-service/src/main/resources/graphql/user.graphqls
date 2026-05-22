@@ -8,7 +8,13 @@ type User {
     roles: [Role]
 }
 
+type UserPage {
+    data: [User]
+    totalElements: Int
+    totalPages: Int
+}
+
 extend type Query {
     getUserById(id: ID!): User
-    getAllUsers: [User]
+    getAllUsers(page: Int = 0, size: Int = 10): UserPage
 }
