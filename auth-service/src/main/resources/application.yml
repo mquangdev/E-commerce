@@ -1,5 +1,12 @@
+server:
+  port: 8081
+
 jwt:
   secret: V2h5RG9Zb3VIYXZlVG9CZVNvU2VyaW91czEyMzQ1Njc4OTA=
+
+app:
+  security:
+    internal-secret: lX4.G9}&%m+0ag6o
 
 spring:
   application:
@@ -31,5 +38,9 @@ spring:
       printer:
         enabled: true
 
-server:
-  port: 8081
+eureka:
+  instance:
+    prefer-ip-address: true # Ưu tiên đăng ký bằng IP thay vì tên máy
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka

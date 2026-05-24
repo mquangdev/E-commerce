@@ -1,11 +1,13 @@
 package e_commerce.auth_service.service.jwt;
 
+import e_commerce.auth_service.entity.UserEntity;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import javax.crypto.SecretKey;
@@ -33,14 +35,30 @@ public class JwtService {
   }
 
   // Tạo Access Token mới cho User
-  public String generateToken(UserDetails userDetails) {
-    return generateToken(new HashMap<>(), userDetails);
+  public String generateToken(UserEntity userEntity) {
+    Map<String, Object> extraClaims = new HashMap<>();
+
+    List<Map<String, Object>> roles =
+        userEntity.getRoles().stream()
+            .map(
+                role -> {
+                  Map<String, Object> roleData = new HashMap<>();
+                  roleData.put("id", role.getId().toString()); // Chuyển UUID sang String
+                  roleData.put("name", role.getName());
+                  return roleData;
+                })
+            .toList();
+
+    extraClaims.put("userId", userEntity.getId().toString());
+    extraClaims.put("roles", roles);
+
+    return generateToken(extraClaims, userEntity);
   }
 
-  private String generateToken(Map<String, Object> extraClaims, UserDetails userDetails) {
+  private String generateToken(Map<String, Object> extraClaims, UserEntity userEntity) {
     return Jwts.builder()
         .claims(extraClaims)
-        .subject(userDetails.getUsername())
+        .subject(userEntity.getUsername())
         .issuedAt(new Date(System.currentTimeMillis()))
         .expiration(new Date(System.currentTimeMillis() + jwtExpiration))
         .signWith(getSignInKey()) // Thuật toán tự động nhận diện từ key (HS256)

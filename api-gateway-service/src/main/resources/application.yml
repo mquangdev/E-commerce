@@ -1,0 +1,47 @@
+﻿server:
+  port: 8088
+
+jwt:
+  secret: V2h5RG9Zb3VfYXZlVG9CZVNvU2VyaW91czEyMzQ1Njc4OTA=
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            # 1. TUYEN DUONG PUBLIC (Khong can JWT, chi can Secret)
+            - id: auth-service-route
+              uri: lb://auth-service
+              predicates:
+                - Path=/api/v1/auth/**
+              filters:
+                - AddRequestHeader=X-Gateway-Secret, lX4.G9}&%m+0ag6o
+
+        # 2. TUYEN DUONG PROTECTED (Bat buoc phai co JWT hop le)
+#        - id: order-service-route
+#          uri: http://localhost:8082
+#          predicates:
+#            - Path=/api/v1/orders/**
+#          filters:
+#            - AddRequestHeader=X-Gateway-Secret, lX4.G9}&%m+0ag6o
+#            - JwtAuthGatewayFilter
+eureka:
+  instance:
+    prefer-ip-address: true # Ưu tiên đăng ký bằng IP thay vì tên máy
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+logging:
+  level:
+    # 🕵️‍♂️ Theo dõi cách Gateway khớp tuyến đường (Route) và chạy các Filter
+    org.springframework.cloud.gateway: TRACE
+
+    # 🌐 Xem chi tiết các Request/Response HTTP ra vào môi trường WebFlux
+    org.springframework.http.server.reactive: DEBUG
+
+    # ⚖️ Xem quá trình Load Balancer (lb://) hỏi Eureka để tìm địa chỉ IP
+    org.springframework.cloud.loadbalancer: DEBUG

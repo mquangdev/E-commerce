@@ -1,0 +1,6 @@
+﻿server:
+  port: 8761
+eureka:
+  client:
+    register-with-eureka: false # Bao: Toi la tong dai, khong can dang ky
+    fetch-registry: false       # Bao: Toi khong can tai danh ba ve

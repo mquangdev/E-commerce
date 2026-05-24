@@ -1,4 +1,4 @@
-package e_commerce.auth_service.config;
+package e_commerce.auth_service.filters;
 
 import e_commerce.auth_service.service.jwt.JwtService;
 import e_commerce.auth_service.service.user.UserService;

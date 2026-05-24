@@ -1,5 +1,7 @@
 package e_commerce.auth_service.config;
 
+import e_commerce.auth_service.filters.GatewaySecurityFilter;
+import e_commerce.auth_service.filters.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -13,9 +15,12 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
   private final JwtAuthenticationFilter jwtAuthFilter;
+  private final GatewaySecurityFilter gatewaySecurityFilter;
 
-  public SecurityConfig(JwtAuthenticationFilter jwtAuthFilter) {
+  public SecurityConfig(
+      JwtAuthenticationFilter jwtAuthFilter, GatewaySecurityFilter gatewaySecurityFilter) {
     this.jwtAuthFilter = jwtAuthFilter;
+    this.gatewaySecurityFilter = gatewaySecurityFilter;
   }
 
   @Bean
@@ -33,7 +38,8 @@ public class SecurityConfig {
                     .permitAll()
                     .anyRequest()
                     .authenticated())
-        .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        .addFilterBefore(gatewaySecurityFilter, UsernamePasswordAuthenticationFilter.class)
+        .addFilterAfter(jwtAuthFilter, GatewaySecurityFilter.class);
     return http.build();
   }
 }
