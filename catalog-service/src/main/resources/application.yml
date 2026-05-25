@@ -6,16 +6,16 @@ jwt:
 
 app:
   security:
-    internal-secret: lX4.G9}&%m+0ag6o
+    internal-secret: lX4.G9-SecretKey-0ag6o
 
 spring:
   application:
     name: catalog-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/EC-catalog-local
-    username: pmkt
-    password: pmkt123
+    url: jdbc:postgresql://localhost:5433/EC-catalog
+    username: admin
+    password: admin123
     driver-class-name: org.postgresql.Driver
 
   jpa:

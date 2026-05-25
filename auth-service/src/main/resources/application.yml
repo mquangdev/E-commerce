@@ -6,14 +6,14 @@ jwt:
 
 app:
   security:
-    internal-secret: lX4.G9}&%m+0ag6o
+    internal-secret: lX4.G9-SecretKey-0ag6o
 
 spring:
   application:
     name: auth-service
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/postgres
+    url: jdbc:postgresql://localhost:5433/EC-auth
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
