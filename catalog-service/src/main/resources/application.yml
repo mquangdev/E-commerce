@@ -1,0 +1,46 @@
+server:
+  port: 8083
+
+jwt:
+  secret: V2h5RG9Zb3VIYXZlVG9CZVNvU2VyaW91czEyMzQ1Njc4OTA=
+
+app:
+  security:
+    internal-secret: lX4.G9}&%m+0ag6o
+
+spring:
+  application:
+    name: catalog-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/EC-catalog-local
+    username: pmkt
+    password: pmkt123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+
+  graphql:
+    graphiql:
+      enabled: true
+    schema:
+      printer:
+        enabled: true
+
+eureka:
+  instance:
+    prefer-ip-address: true # Uu tien dang ky bang IP thay vi ten may
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
