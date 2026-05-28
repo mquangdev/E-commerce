@@ -1,0 +1,3 @@
+spring:
+  elasticsearch:
+    uris: http://localhost:9200 # ? C?ng k?t n?i c?a Elasticsearch trùng v?i Docker

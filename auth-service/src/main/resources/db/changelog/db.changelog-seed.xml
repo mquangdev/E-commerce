@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="load-seed-roles" author="developer" context="seed">
+    <comment>Load initial roles from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/roles.csv"
+              tableName="roles">
+      <column name="id" type="UUID"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="is_deleted" type="BOOLEAN"/>
+      <column name="created_at" type="TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-seed-users" author="developer" context="seed">
+    <comment>Load initial users from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/users.csv"
+              tableName="users">
+      <column name="id" type="UUID"/>
+      <column name="username" type="STRING"/>
+      <column name="email" type="STRING"/>
+      <column name="password_hash" type="STRING"/>
+      <column name="status" type="STRING"/>
+      <column name="is_deleted" type="BOOLEAN"/>
+      <column name="created_at" type="TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-seed-user-roles" author="developer" context="seed">
+    <comment>Load mapping between users and roles from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/user_roles.csv"
+              tableName="user_roles">
+      <column name="user_id" type="UUID"/>
+      <column name="role_id" type="UUID"/>
+    </loadData>
+  </changeSet>
+
+</databaseChangeLog>

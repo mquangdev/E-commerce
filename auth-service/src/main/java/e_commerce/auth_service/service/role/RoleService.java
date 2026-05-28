@@ -1,17 +1,17 @@
 package e_commerce.auth_service.service.role;
 
+import e_commerce.auth_service.dto.response.PageResponse;
 import e_commerce.auth_service.dto.response.RoleResponse;
 import e_commerce.auth_service.entity.RoleEntity;
-import e_commerce.auth_service.exception.ResourceAlreadyExistsException;
-import e_commerce.auth_service.exception.ResourceNotFoundException;
 import e_commerce.auth_service.repository.role.RoleRepository;
-import java.util.UUID;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import e_commerce.auth_service.dto.response.PageResponse;
+import e_commerce.common_shared.exception.ResourceAlreadyExistsException;
+import e_commerce.common_shared.exception.ResourceNotFoundException;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,9 +32,8 @@ public class RoleService {
 
   public PageResponse<RoleResponse> getAllRoles(int page, int size) {
     Page<RoleEntity> rolePage = roleRepository.findAll(PageRequest.of(page, size));
-    List<RoleResponse> roleResponses = rolePage.getContent().stream()
-        .map(this::mapToResponse)
-        .collect(Collectors.toList());
+    List<RoleResponse> roleResponses =
+        rolePage.getContent().stream().map(this::mapToResponse).collect(Collectors.toList());
 
     return PageResponse.<RoleResponse>builder()
         .data(roleResponses)
@@ -48,20 +47,23 @@ public class RoleService {
       throw new ResourceAlreadyExistsException("Role với tên " + request.getName() + " đã tồn tại");
     }
 
-    RoleEntity role = RoleEntity.builder()
-        .id(UUID.randomUUID())
-        .name(request.getName())
-        .description(request.getDescription())
-        .build();
+    RoleEntity role =
+        RoleEntity.builder()
+            .id(UUID.randomUUID())
+            .name(request.getName())
+            .description(request.getDescription())
+            .build();
 
     roleRepository.save(role);
     return mapToResponse(role);
   }
 
-  public RoleResponse updateRole(UUID id, e_commerce.auth_service.dto.request.UpdateRoleRequest request) {
+  public RoleResponse updateRole(
+      UUID id, e_commerce.auth_service.dto.request.UpdateRoleRequest request) {
     RoleEntity role = getRoleById(id);
 
-    if (!role.getName().equals(request.getName()) && roleRepository.existsByName(request.getName())) {
+    if (!role.getName().equals(request.getName())
+        && roleRepository.existsByName(request.getName())) {
       throw new ResourceAlreadyExistsException("Role với tên " + request.getName() + " đã tồn tại");
     }
 

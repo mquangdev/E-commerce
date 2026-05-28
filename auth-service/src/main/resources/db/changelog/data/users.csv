@@ -1,0 +1,5 @@
+id,username,email,password_hash,status,is_deleted,created_at,updated_at
+d8c558c4-bead-49ab-b197-bb78370aa901,quangtm,quang@gmail.com,$2a$10$uOaValf456HGC0EzdgFPl.LoOp/vV5TKMC7IOjDb6.kzRJaLgs4Cu,ACTIVE,false,2026-05-26 12:00:00,2026-05-26 12:00:00
+d8c558c4-bead-49ab-b197-bb78370aa902,manager_user,manager@gmail.com,$2a$10$BmnUFZj4Y/sz2f9RiLRoS.5jNDdXxt/IGriGxSaWLQY.cxAujE0wK,ACTIVE,false,2026-05-26 12:00:00,2026-05-26 12:00:00
+d8c558c4-bead-49ab-b197-bb78370aa903,normal_user,user@gmail.com,$2a$10$BmnUFZj4Y/sz2f9RiLRoS.5jNDdXxt/IGriGxSaWLQY.cxAujE0wK,ACTIVE,false,2026-05-26 12:00:00,2026-05-26 12:00:00
+d8c558c4-bead-49ab-b197-bb78370aa904,guest_user,guest@gmail.com,$2a$10$BmnUFZj4Y/sz2f9RiLRoS.5jNDdXxt/IGriGxSaWLQY.cxAujE0wK,ACTIVE,false,2026-05-26 12:00:00,2026-05-26 12:00:00

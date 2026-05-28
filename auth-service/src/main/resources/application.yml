@@ -7,13 +7,15 @@ jwt:
 app:
   security:
     internal-secret: lX4.G9-SecretKey-0ag6o
+    gateway-filter:
+      enabled: true
 
 spring:
   application:
     name: auth-service
   
   datasource:
-    url: jdbc:postgresql://localhost:5433/EC-auth
+    url: jdbc:postgresql://localhost:5432/EC-auth
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -30,6 +32,7 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
     enabled: true
+    contexts: ${SPRING_LIQUIBASE_CONTEXTS:default,seed}
 
   graphql:
     graphiql:

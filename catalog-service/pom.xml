@@ -101,6 +101,11 @@
       <artifactId>google-java-format</artifactId>
       <version>${google-java-format.version}</version>
     </dependency>
+    <dependency>
+      <groupId>e_commerce</groupId>
+      <artifactId>common_shared</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
+    </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>

@@ -1,18 +1,18 @@
 package e_commerce.catalog_service.commands.services;
 
 import e_commerce.catalog_service.commands.dtos.ProductCreateRequest;
-import e_commerce.catalog_service.commands.dtos.ProductUpdateRequest;
 import e_commerce.catalog_service.commands.dtos.ProductResponse;
+import e_commerce.catalog_service.commands.dtos.ProductUpdateRequest;
 import e_commerce.catalog_service.commands.entities.CategoryEntity;
 import e_commerce.catalog_service.commands.entities.ProductEntity;
 import e_commerce.catalog_service.commands.repositories.CategoryRepository;
 import e_commerce.catalog_service.commands.repositories.ProductRepository;
-import e_commerce.catalog_service.exception.ResourceAlreadyExistsException;
-import e_commerce.catalog_service.exception.ResourceNotFoundException;
+import e_commerce.common_shared.exception.ResourceAlreadyExistsException;
+import e_commerce.common_shared.exception.ResourceNotFoundException;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,11 +20,17 @@ public class ProductCommandService {
 
   private final ProductRepository productRepository;
   private final CategoryRepository categoryRepository;
+  private final OutboxEventService outboxEventService;
 
   @Transactional
   public ProductResponse createProduct(ProductCreateRequest request) {
-    CategoryEntity category = categoryRepository.findByIdAndIsDeletedFalse(request.getCategoryId())
-        .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + request.getCategoryId()));
+    CategoryEntity category =
+        categoryRepository
+            .findByIdAndIsDeletedFalse(request.getCategoryId())
+            .orElseThrow(
+                () ->
+                    new ResourceNotFoundException(
+                        "Không tìm thấy danh mục với ID: " + request.getCategoryId()));
 
     if (productRepository.existsBySku(request.getSku())) {
       throw new ResourceAlreadyExistsException("SKU đã tồn tại");
@@ -42,6 +48,7 @@ public class ProductCommandService {
         .build();
 
     ProductEntity saved = productRepository.save(product);
+    outboxEventService.insertOutboxEvent("CREATE", "products", saved.getId(), mapToResponse(saved));
     return mapToResponse(saved);
   }
 
@@ -61,6 +68,7 @@ public class ProductCommandService {
     product.setStockQuantity(request.getStockQuantity());
 
     ProductEntity saved = productRepository.save(product);
+    outboxEventService.insertOutboxEvent("UPDATE", "products", saved.getId(), mapToResponse(saved));
     return mapToResponse(saved);
   }
 
@@ -71,6 +79,7 @@ public class ProductCommandService {
 
     product.setDeleted(true);
     productRepository.save(product);
+    outboxEventService.insertOutboxEvent("DELETE", "products", id, null);
   }
 
   private ProductResponse mapToResponse(ProductEntity entity) {

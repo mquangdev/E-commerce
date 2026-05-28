@@ -6,10 +6,10 @@ import e_commerce.auth_service.dto.response.AuthResponseInternal;
 import e_commerce.auth_service.entity.RefreshTokenEntity;
 import e_commerce.auth_service.entity.UserEntity;
 import e_commerce.auth_service.enums.UserStatus;
-import e_commerce.auth_service.exception.AuthException;
 import e_commerce.auth_service.repository.refreshToken.RefreshTokenRepository;
 import e_commerce.auth_service.repository.user.UserRepository;
 import e_commerce.auth_service.service.jwt.JwtService;
+import e_commerce.common_shared.exception.AuthException;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -63,7 +63,7 @@ public class AuthService {
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     // 3. Xử lý token cũ: Tìm token cũ của user trên thiết bị này và thu hồi
-    var oldTokenOpt =
+    Optional<RefreshTokenEntity> oldTokenOpt =
         refreshTokenRepository.findByUserAndDeviceIdAndIsRevokedFalse(user, request.getDeviceId());
     if (oldTokenOpt.isPresent()) {
       var oldToken = oldTokenOpt.get();
@@ -73,7 +73,7 @@ public class AuthService {
 
     // 4. Tạo và lưu refresh token mới
     var refreshToken = UUID.randomUUID();
-    var newRefreshToken =
+    RefreshTokenEntity newRefreshToken =
         RefreshTokenEntity.builder()
             .id(UUID.randomUUID())
             .user(user)

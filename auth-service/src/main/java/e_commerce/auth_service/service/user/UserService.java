@@ -1,30 +1,28 @@
 package e_commerce.auth_service.service.user;
 
+import e_commerce.auth_service.dto.request.CreateUserRequest;
+import e_commerce.auth_service.dto.request.UpdateUserRequest;
+import e_commerce.auth_service.dto.response.PageResponse;
+import e_commerce.auth_service.dto.response.RoleResponse;
+import e_commerce.auth_service.dto.response.UserResponse;
+import e_commerce.auth_service.entity.UserEntity;
+import e_commerce.auth_service.enums.UserStatus;
+import e_commerce.auth_service.repository.role.RoleRepository;
+import e_commerce.auth_service.repository.user.UserRepository;
+import e_commerce.common_shared.exception.ResourceAlreadyExistsException;
+import e_commerce.common_shared.exception.ResourceNotFoundException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import e_commerce.auth_service.dto.response.PageResponse;
-
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
-import e_commerce.auth_service.dto.request.CreateUserRequest;
-import e_commerce.auth_service.dto.request.UpdateUserRequest;
-import e_commerce.auth_service.dto.response.RoleResponse;
-import e_commerce.auth_service.dto.response.UserResponse;
-import e_commerce.auth_service.entity.UserEntity;
-import e_commerce.auth_service.enums.UserStatus;
-import e_commerce.auth_service.exception.ResourceAlreadyExistsException;
-import e_commerce.auth_service.exception.ResourceNotFoundException;
-import e_commerce.auth_service.repository.role.RoleRepository;
-import e_commerce.auth_service.repository.user.UserRepository;
-import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +33,8 @@ public class UserService implements UserDetailsService {
   private final PasswordEncoder passwordEncoder;
 
   public UserEntity getUserById(UUID id) {
-    return userRepository.findById(id)
+    return userRepository
+        .findById(id)
         .orElseThrow(() -> new ResourceNotFoundException("Không tìm thấy User với ID: " + id));
   }
 
@@ -45,9 +44,8 @@ public class UserService implements UserDetailsService {
 
   public PageResponse<UserResponse> getAllUsers(int page, int size) {
     Page<UserEntity> userPage = userRepository.findAll(PageRequest.of(page, size));
-    List<UserResponse> userResponses = userPage.getContent().stream()
-        .map(this::mapToResponse)
-        .collect(Collectors.toList());
+    List<UserResponse> userResponses =
+        userPage.getContent().stream().map(this::mapToResponse).collect(Collectors.toList());
 
     return PageResponse.<UserResponse>builder()
         .data(userResponses)
@@ -64,16 +62,18 @@ public class UserService implements UserDetailsService {
       throw new ResourceAlreadyExistsException("Email đã tồn tại");
     }
 
-    UserEntity user = UserEntity.builder()
-        .id(UUID.randomUUID())
-        .username(request.getUsername())
-        .email(request.getEmail())
-        .passwordHash(passwordEncoder.encode(request.getPassword()))
-        .status(request.getStatus() != null ? request.getStatus() : UserStatus.ACTIVE)
-        .build();
+    UserEntity user =
+        UserEntity.builder()
+            .id(UUID.randomUUID())
+            .username(request.getUsername())
+            .email(request.getEmail())
+            .passwordHash(passwordEncoder.encode(request.getPassword()))
+            .status(request.getStatus() != null ? request.getStatus() : UserStatus.ACTIVE)
+            .build();
 
     if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
-      List<e_commerce.auth_service.entity.RoleEntity> roles = roleRepository.findAllByIdIn(request.getRoleIds());
+      List<e_commerce.auth_service.entity.RoleEntity> roles =
+          roleRepository.findAllByIdIn(request.getRoleIds());
       user.setRoles(new HashSet<>(roles));
     } else {
       user.setRoles(new HashSet<>());
@@ -86,7 +86,8 @@ public class UserService implements UserDetailsService {
   public UserResponse updateUser(UUID id, UpdateUserRequest request) {
     UserEntity user = getUserById(id);
 
-    if (!user.getEmail().equals(request.getEmail()) && userRepository.existsByEmail(request.getEmail())) {
+    if (!user.getEmail().equals(request.getEmail())
+        && userRepository.existsByEmail(request.getEmail())) {
       throw new ResourceAlreadyExistsException("Email đã tồn tại");
     }
 
@@ -96,7 +97,8 @@ public class UserService implements UserDetailsService {
     }
 
     if (request.getRoleIds() != null) {
-      List<e_commerce.auth_service.entity.RoleEntity> roles = roleRepository.findAllByIdIn(request.getRoleIds());
+      List<e_commerce.auth_service.entity.RoleEntity> roles =
+          roleRepository.findAllByIdIn(request.getRoleIds());
       user.setRoles(new HashSet<>(roles));
     }
 
@@ -117,13 +119,16 @@ public class UserService implements UserDetailsService {
         .status(user.getStatus())
         .createdAt(user.getCreatedAt())
         .updatedAt(user.getUpdatedAt())
-        .roles(user.getRoles().stream()
-            .map(role -> RoleResponse.builder()
-                .id(role.getId())
-                .name(role.getName())
-                .description(role.getDescription())
-                .build())
-            .collect(Collectors.toSet()))
+        .roles(
+            user.getRoles().stream()
+                .map(
+                    role ->
+                        RoleResponse.builder()
+                            .id(role.getId())
+                            .name(role.getName())
+                            .description(role.getDescription())
+                            .build())
+                .collect(Collectors.toSet()))
         .build();
   }
 

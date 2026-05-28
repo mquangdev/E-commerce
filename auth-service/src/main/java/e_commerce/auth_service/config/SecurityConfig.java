@@ -1,7 +1,7 @@
 package e_commerce.auth_service.config;
 
-import e_commerce.auth_service.filters.GatewaySecurityFilter;
 import e_commerce.auth_service.filters.JwtAuthenticationFilter;
+import e_commerce.common_shared.filter.GatewaySecurityFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,7 +34,8 @@ public class SecurityConfig {
                         "/swagger-ui.html",
                         "/graphiql/**",
                         "/graphql/**",
-                        "/api/v1/auth/**")
+                        "/api/v1/login",
+                        "/api/v1/register")
                     .permitAll()
                     .anyRequest()
                     .authenticated())

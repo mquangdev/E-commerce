@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="load-seed-categories" author="developer" context="seed">
+    <comment>Load initial categories from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/categories.csv"
+              tableName="categories">
+      <column name="id" type="UUID"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="is_active" type="BOOLEAN"/>
+      <column name="is_deleted" type="BOOLEAN"/>
+      <column name="created_at" type="TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP"/>
+      <column name="version" type="NUMERIC"/>
+    </loadData>
+  </changeSet>
+
+  <changeSet id="load-seed-products" author="developer" context="seed">
+    <comment>Load initial products from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/products.csv"
+              tableName="products">
+      <column name="id" type="UUID"/>
+      <column name="category_id" type="UUID"/>
+      <column name="sku" type="STRING"/>
+      <column name="name" type="STRING"/>
+      <column name="description" type="STRING"/>
+      <column name="price" type="NUMERIC"/>
+      <column name="image_url" type="STRING"/>
+      <column name="stock_quantity" type="NUMERIC"/>
+      <column name="is_deleted" type="BOOLEAN"/>
+      <column name="created_at" type="TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP"/>
+      <column name="version" type="NUMERIC"/>
+    </loadData>
+  </changeSet>
+
+</databaseChangeLog>
