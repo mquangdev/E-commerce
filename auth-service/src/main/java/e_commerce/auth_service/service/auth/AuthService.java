@@ -160,8 +160,7 @@ public class AuthService {
     Cookie cookie = new Cookie("refreshToken", refreshToken);
     cookie.setHttpOnly(true); // 🛡️ Chống XSS (JavaScript không đọc được)
     cookie.setSecure(true); // Chỉ gửi qua HTTPS (trên môi trường thật)
-    cookie.setPath(
-        "/api/v1/auth/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setPath("/api/v1/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
     cookie.setMaxAge(7 * 24 * 60 * 60); // Sống 7 ngày
     return cookie;
   }
@@ -170,8 +169,7 @@ public class AuthService {
     Cookie cookie = new Cookie("refreshToken", "");
     cookie.setHttpOnly(true); // 🛡️ Chống XSS (JavaScript không đọc được)
     cookie.setSecure(true); // Chỉ gửi qua HTTPS (trên môi trường thật)
-    cookie.setPath(
-        "/api/v1/auth/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setPath("/api/v1/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
     cookie.setMaxAge(7 * 24 * 60 * 60); // Sống 0 giây = Xóa ngay lập tức
 
     return cookie;
