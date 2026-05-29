@@ -4,3 +4,11 @@ server:
 spring:
   elasticsearch:
     uris: http://localhost:9200 # Port ket noi cua Elasticsearch trong Docker
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
+  cache:
+    type: redis

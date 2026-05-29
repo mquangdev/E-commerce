@@ -33,15 +33,27 @@ public class CatalogEventListener {
         if ("categories".equals(aggregateType)) {
           switch (eventType) {
             case "CREATE":
-            case "UPDATE":
-              // Bước 2: Chỉ ép kiểu payload khi có dữ liệu (CREATE/UPDATE)
               CategoryDocument document =
                   objectMapper.readValue(payloadString, CategoryDocument.class);
               categorySearchRepository.save(document);
 
-              String action = eventType.equals("CREATE") ? "tạo" : "cập nhật";
+              System.out.println("Đã tạo thành công Category vào ES: " + document.getName());
+              break;
+            case "UPDATE":
+              CategoryDocument incomingDoc =
+                  objectMapper.readValue(payloadString, CategoryDocument.class);
+              CategoryDocument existingDoc =
+                  categorySearchRepository.findById(incomingDoc.getId()).orElse(null);
+
+              if (existingDoc != null && existingDoc.getVersion() > incomingDoc.getVersion()) {
+                System.out.println(
+                    "⚠️ Bỏ qua tin nhắn cũ (Out-of-order) của Category ID: " + incomingDoc.getId());
+                break;
+              }
+
+              categorySearchRepository.save(incomingDoc);
               System.out.println(
-                  "Đã " + action + " thành công Category vào ES: " + document.getName());
+                  "Đã cập nhật thành công Category vào ES: " + existingDoc.getName());
               break;
             case "DELETE":
               // Bước 3: Xóa trực tiếp bằng aggregateId không cần đọc payload
@@ -54,14 +66,25 @@ public class CatalogEventListener {
         } else if ("products".equals(aggregateType)) {
           switch (eventType) {
             case "CREATE":
-            case "UPDATE":
               ProductDocument document =
                   objectMapper.readValue(payloadString, ProductDocument.class);
               productSearchRepository.save(document);
+              System.out.println("Đã tạo thành công Product vào ES: " + document.getName());
+              break;
+            case "UPDATE":
+              ProductDocument incomingDoc =
+                  objectMapper.readValue(payloadString, ProductDocument.class);
+              ProductDocument existingDoc =
+                  productSearchRepository.findById(incomingDoc.getId()).orElse(null);
 
-              String action = eventType.equals("CREATE") ? "tạo" : "cập nhật";
-              System.out.println(
-                  "Đã " + action + " thành công Product vào ES: " + document.getName());
+              if (existingDoc != null && existingDoc.getVersion() > incomingDoc.getVersion()) {
+                System.out.println(
+                    "⚠️ Bỏ qua tin nhắn cũ (Out-of-order) của Product ID: " + incomingDoc.getId());
+                break;
+              }
+
+              productSearchRepository.save(incomingDoc);
+              System.out.println("Đã cập nhật thành công Product vào ES: " + incomingDoc.getName());
               break;
             case "DELETE":
               productSearchRepository.deleteById(aggregateId);
@@ -74,6 +97,7 @@ public class CatalogEventListener {
       }
     } catch (Exception e) {
       System.err.println("Lỗi phân tích cú pháp tin nhắn: " + e.getMessage());
+      throw new RuntimeException("Lỗi đồng bộ Elasticsearch", e);
     }
   }
 }

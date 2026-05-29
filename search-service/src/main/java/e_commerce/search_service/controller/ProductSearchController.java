@@ -1,7 +1,7 @@
 package e_commerce.search_service.controller;
 
-import e_commerce.search_service.document.CategoryDocument;
-import e_commerce.search_service.repository.CategorySearchRepository;
+import e_commerce.search_service.document.ProductDocument;
+import e_commerce.search_service.repository.ProductSearchRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -10,19 +10,19 @@ import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/search/categories")
+@RequestMapping("/api/search/products")
 @RequiredArgsConstructor
-public class CategorySearchController {
-  private final CategorySearchRepository categorySearchRepository;
+public class ProductSearchController {
+  private final ProductSearchRepository productSearchRepository;
 
   @GetMapping
-  public Page<CategoryDocument> searchCategories(
+  public Page<ProductDocument> searchProducts(
       @RequestParam String keyword,
       @RequestParam(defaultValue = "0") int page,
       @RequestParam(defaultValue = "10") int size) {
     Sort sort = Sort.by(Sort.Direction.DESC, "createdAt");
     Pageable pageable = PageRequest.of(page, size).withSort(sort);
-    return categorySearchRepository.findByNameContainingOrDescriptionContaining(
+    return productSearchRepository.findByNameContainingOrDescriptionContaining(
         keyword, keyword, pageable);
   }
 }

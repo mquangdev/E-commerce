@@ -10,7 +10,7 @@ services:
     container_name: postgres-ecommerce-local
     restart: always
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       POSTGRES_DB: ecommerce_local
       POSTGRES_USER: admin
@@ -95,3 +95,11 @@ services:
       CONFIG_STORAGE_TOPIC: connect_configs
       OFFSET_STORAGE_TOPIC: connect_offsets
       STATUS_STORAGE_TOPIC: connect_statuses
+      
+  # 7. Redis
+  redis:
+    image: redis:alpine
+    container_name: e_commerce_redis
+    ports:
+      - "6379:6379" # 6379 là cổng mặc định huyền thoại của Redis
+    restart: always

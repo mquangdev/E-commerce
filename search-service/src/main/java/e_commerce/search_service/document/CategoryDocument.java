@@ -38,4 +38,7 @@ public class CategoryDocument {
   @JsonDeserialize(using = LocalDateTimeDeserializer.class)
   @JsonFormat(shape = Shape.STRING)
   private LocalDateTime updatedAt;
+
+  @Field(type = FieldType.Long)
+  private Long version;
 }
