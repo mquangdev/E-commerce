@@ -3,6 +3,7 @@ package e_commerce.search_service.controller;
 import e_commerce.search_service.document.CategoryDocument;
 import e_commerce.search_service.repository.CategorySearchRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,6 +17,7 @@ public class CategorySearchController {
   private final CategorySearchRepository categorySearchRepository;
 
   @GetMapping
+  @Cacheable(value = "cache:categories", key = "#keyword + ':' + #page + ':' + #size")
   public Page<CategoryDocument> searchCategories(
       @RequestParam String keyword,
       @RequestParam(defaultValue = "0") int page,

@@ -4,7 +4,9 @@ import e_commerce.search_service.document.CategoryDocument;
 import e_commerce.search_service.document.ProductDocument;
 import e_commerce.search_service.repository.CategorySearchRepository;
 import e_commerce.search_service.repository.ProductSearchRepository;
+import java.util.Set;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.JsonNode;
@@ -16,6 +18,7 @@ public class CatalogEventListener {
   private final ObjectMapper objectMapper;
   private final CategorySearchRepository categorySearchRepository;
   private final ProductSearchRepository productSearchRepository;
+  private final RedisTemplate redisTemplate;
 
   @KafkaListener(topics = "ecommerce.public.outbox_events", groupId = "search-service-group")
   public void handleCatalogEvents(String message) {
@@ -36,8 +39,9 @@ public class CatalogEventListener {
               CategoryDocument document =
                   objectMapper.readValue(payloadString, CategoryDocument.class);
               categorySearchRepository.save(document);
-
               System.out.println("Đã tạo thành công Category vào ES: " + document.getName());
+
+              clearRedisCacheCategories();
               break;
             case "UPDATE":
               CategoryDocument incomingDoc =
@@ -50,15 +54,18 @@ public class CatalogEventListener {
                     "⚠️ Bỏ qua tin nhắn cũ (Out-of-order) của Category ID: " + incomingDoc.getId());
                 break;
               }
-
               categorySearchRepository.save(incomingDoc);
               System.out.println(
                   "Đã cập nhật thành công Category vào ES: " + existingDoc.getName());
+
+              clearRedisCacheCategories();
               break;
             case "DELETE":
               // Bước 3: Xóa trực tiếp bằng aggregateId không cần đọc payload
               categorySearchRepository.deleteById(aggregateId);
               System.out.println("Đã xóa thành công Category khỏi ES ID: " + aggregateId);
+
+              clearRedisCacheCategories();
               break;
             default:
               System.out.println("Không hỗ trợ loại sự kiện: " + eventType);
@@ -70,6 +77,8 @@ public class CatalogEventListener {
                   objectMapper.readValue(payloadString, ProductDocument.class);
               productSearchRepository.save(document);
               System.out.println("Đã tạo thành công Product vào ES: " + document.getName());
+
+              clearRedisCacheProducts();
               break;
             case "UPDATE":
               ProductDocument incomingDoc =
@@ -85,10 +94,14 @@ public class CatalogEventListener {
 
               productSearchRepository.save(incomingDoc);
               System.out.println("Đã cập nhật thành công Product vào ES: " + incomingDoc.getName());
+
+              clearRedisCacheProducts();
               break;
             case "DELETE":
               productSearchRepository.deleteById(aggregateId);
               System.out.println("Đã xóa thành công Product khỏi ES ID: " + aggregateId);
+
+              clearRedisCacheProducts();
               break;
             default:
               System.out.println("Không hỗ trợ loại sự kiện: " + eventType);
@@ -98,6 +111,24 @@ public class CatalogEventListener {
     } catch (Exception e) {
       System.err.println("Lỗi phân tích cú pháp tin nhắn: " + e.getMessage());
       throw new RuntimeException("Lỗi đồng bộ Elasticsearch", e);
+    }
+  }
+
+  private void clearRedisCacheCategories() {
+    Set<String> keysToDelete = redisTemplate.keys("cache:categories:*");
+
+    if (keysToDelete != null && !keysToDelete.isEmpty()) {
+      redisTemplate.delete(keysToDelete);
+      System.out.println("🧹 Đã dọn dẹp toàn bộ Cache danh mục bị cũ trên Redis!");
+    }
+  }
+
+  private void clearRedisCacheProducts() {
+    Set<String> keysToDelete = redisTemplate.keys("cache:products:*");
+
+    if (keysToDelete != null && !keysToDelete.isEmpty()) {
+      redisTemplate.delete(keysToDelete);
+      System.out.println("🧹 Đã dọn dẹp toàn bộ Cache sản phẩm bị cũ trên Redis!");
     }
   }
 }

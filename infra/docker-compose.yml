@@ -103,3 +103,10 @@ services:
     ports:
       - "6379:6379" # 6379 là cổng mặc định huyền thoại của Redis
     restart: always
+  # 8. Redis Insight (Siêu xe UI chính chủ của Redis)
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis_insight
+    ports:
+      - "5540:5540" # Cổng mặc định của Redis Insight phiên bản mới
+    restart: always
