@@ -1,0 +1,42 @@
+server:
+  port: 8082
+
+app:
+  security:
+    internal-secret: lX4.G9-SecretKey-0ag6o
+    gateway-filter:
+      enabled: true
+
+spring:
+  application:
+    name: inventory-service
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/EC-inventory
+    username: admin
+    password: admin123
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: none
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+    enabled: true
+    contexts: ${SPRING_LIQUIBASE_CONTEXTS:default,seed}
+
+eureka:
+  instance:
+    prefer-ip-address: true
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka
+
+temporal:
+  target: localhost:7233

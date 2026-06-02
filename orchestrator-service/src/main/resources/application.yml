@@ -1,0 +1,10 @@
+server:
+  port: 8082
+
+spring:
+  application:
+    name: orchestrator-service
+
+temporal:
+  target: localhost:7233
+  task-queue: SAGA_TASK_QUEUE

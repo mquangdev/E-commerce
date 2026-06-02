@@ -31,8 +31,7 @@ spring:
                 - JwtAuth
                 - RewritePath=/catalog/(?<segment>.*), /$1
 
-
-                # === CẤU HÌNH GRAPHQL CHO AUTH SERVICE ===
+            # === CẤU HÌNH GRAPHQL CHO AUTH SERVICE ===
             - id: auth-graphql-route
               uri: lb://auth-service
               predicates:

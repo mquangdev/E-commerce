@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="load-seed-user-wallets" author="developer" context="seed">
+    <comment>Load initial user wallets from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/user_wallets.csv"
+              tableName="user_wallets">
+      <column name="id" type="UUID"/>
+      <column name="user_id" type="UUID"/>
+      <column name="balance" type="NUMERIC"/>
+      <column name="version" type="BIGINT"/>
+      <column name="created_at" type="TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP"/>
+    </loadData>
+  </changeSet>
+</databaseChangeLog>

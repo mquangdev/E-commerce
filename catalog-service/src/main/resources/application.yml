@@ -15,7 +15,7 @@ spring:
     name: catalog-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5433/EC-catalog
+    url: jdbc:postgresql://localhost:5432/EC-catalog
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
