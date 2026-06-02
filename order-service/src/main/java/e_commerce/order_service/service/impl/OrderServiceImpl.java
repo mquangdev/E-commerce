@@ -60,7 +60,6 @@ public class OrderServiceImpl implements OrderService {
     order.setTotalAmount(totalAmount);
 
     OrderEntity saved = orderRepository.save(order);
-    orderItemRepository.saveAll(orderItems);
 
     // 2. Ánh xạ (Map) dữ liệu sang OrderDTO của Orchestrator 🔄
     List<OrderItemDTO> sagaItems =

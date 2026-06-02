@@ -185,6 +185,7 @@
         <artifactId>liquibase-maven-plugin</artifactId>
         <configuration>
           <propertyFile>src/main/resources/liquibase.properties</propertyFile>
+          <searchPath>.,src/main/resources</searchPath>
         </configuration>
         <dependencies>
           <dependency>

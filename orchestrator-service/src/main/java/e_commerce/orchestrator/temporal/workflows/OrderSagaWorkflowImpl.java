@@ -13,10 +13,39 @@ import java.time.Duration;
 
 public class OrderSagaWorkflowImpl implements OrderSagaWorkflow {
   // 1. Cấu hình Luật thử lại (Retry Rules) và Thời gian chờ (Timeout) cho các Activity
-  private final ActivityOptions defaultActivityOptions =
+  private final ActivityOptions orderOptions =
       ActivityOptions.newBuilder()
           // Thời gian tối đa cho một lần thực thi Activity (nếu quá sẽ coi như timeout)
           .setStartToCloseTimeout(Duration.ofMinutes(2))
+          .setTaskQueue("ORDER_TASK_QUEUE")
+          // Cấu hình Exponential Backoff tự động của Temporal
+          .setRetryOptions(
+              RetryOptions.newBuilder()
+                  .setInitialInterval(Duration.ofSeconds(2)) // Thử lại sau 2s ở lần đầu tiên
+                  .setBackoffCoefficient(2.0) // Nhân đôi thời gian chờ ở lần sau (2s -> 4s -> 8s)
+                  .setMaximumAttempts(3) // Thử lại tối đa 3 lần cho lỗi hạ tầng
+                  .build())
+          .build();
+
+  private final ActivityOptions inventoryOptions =
+      ActivityOptions.newBuilder()
+          // Thời gian tối đa cho một lần thực thi Activity (nếu quá sẽ coi như timeout)
+          .setStartToCloseTimeout(Duration.ofMinutes(2))
+          .setTaskQueue("INVENTORY_TASK_QUEUE")
+          // Cấu hình Exponential Backoff tự động của Temporal
+          .setRetryOptions(
+              RetryOptions.newBuilder()
+                  .setInitialInterval(Duration.ofSeconds(2)) // Thử lại sau 2s ở lần đầu tiên
+                  .setBackoffCoefficient(2.0) // Nhân đôi thời gian chờ ở lần sau (2s -> 4s -> 8s)
+                  .setMaximumAttempts(3) // Thử lại tối đa 3 lần cho lỗi hạ tầng
+                  .build())
+          .build();
+
+  private final ActivityOptions paymentOptions =
+      ActivityOptions.newBuilder()
+          // Thời gian tối đa cho một lần thực thi Activity (nếu quá sẽ coi như timeout)
+          .setStartToCloseTimeout(Duration.ofMinutes(2))
+          .setTaskQueue("PAYMENT_TASK_QUEUE")
           // Cấu hình Exponential Backoff tự động của Temporal
           .setRetryOptions(
               RetryOptions.newBuilder()
@@ -29,13 +58,13 @@ public class OrderSagaWorkflowImpl implements OrderSagaWorkflow {
   // 2. Khởi tạo các kết nối ảo (Stubs) tới các service nghiệp vụ thông qua Temporal Server
   // Khi gọi các hàm qua stub này, Temporal sẽ tự đẩy nhiệm vụ vào Task Queue
   private final InventoryActivities inventoryActivities =
-      Workflow.newActivityStub(InventoryActivities.class, defaultActivityOptions);
+      Workflow.newActivityStub(InventoryActivities.class, inventoryOptions);
 
   private final PaymentActivities paymentActivities =
-      Workflow.newActivityStub(PaymentActivities.class, defaultActivityOptions);
+      Workflow.newActivityStub(PaymentActivities.class, paymentOptions);
 
   private final OrderActivities orderActivities =
-      Workflow.newActivityStub(OrderActivities.class, defaultActivityOptions);
+      Workflow.newActivityStub(OrderActivities.class, orderOptions);
 
   @Override
   public void createOrderSaga(OrderDTO order) {

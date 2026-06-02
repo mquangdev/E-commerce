@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<databaseChangeLog
+  xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+    http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-4.0.xsd">
+
+  <changeSet id="load-seed-inventories" author="developer" context="seed">
+    <comment>Load initial inventories from CSV</comment>
+    <loadData encoding="UTF-8"
+              file="db/changelog/data/inventories.csv"
+              tableName="inventories">
+      <column name="id" type="UUID"/>
+      <column name="product_id" type="UUID"/>
+      <column name="available_quantity" type="NUMERIC"/>
+      <column name="reserved_quantity" type="NUMERIC"/>
+      <column name="version" type="BIGINT"/>
+      <column name="created_at" type="TIMESTAMP"/>
+      <column name="updated_at" type="TIMESTAMP"/>
+    </loadData>
+  </changeSet>
+
+</databaseChangeLog>

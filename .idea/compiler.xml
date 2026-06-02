@@ -10,7 +10,7 @@
         <module name="eureka_server" />
         <module name="api_gateway" />
       </profile>
-      <profile name="Annotation profile for payment_service" enabled="true">
+      <profile name="Annotation profile for search_service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />

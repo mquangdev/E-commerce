@@ -1,18 +1,18 @@
 server:
-  port: 8082
+  port: 8087
 
 app:
   security:
     internal-secret: lX4.G9-SecretKey-0ag6o
     gateway-filter:
-      enabled: true
+      enabled: false
 
 spring:
   application:
     name: inventory-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/EC-inventory
+    url: jdbc:postgresql://localhost:5433/EC-inventory
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -40,3 +40,4 @@ eureka:
 
 temporal:
   target: localhost:7233
+  task-queue: INVENTORY_TASK_QUEUE

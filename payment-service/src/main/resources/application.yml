@@ -12,7 +12,7 @@ spring:
     name: payment-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/EC-payment
+    url: jdbc:postgresql://localhost:5433/EC-payment
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -40,3 +40,4 @@ eureka:
 
 temporal:
   target: localhost:7233
+  task-queue: PAYMENT_TASK_QUEUE

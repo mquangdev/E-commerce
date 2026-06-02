@@ -1,4 +1,4 @@
-﻿server:
+server:
   port: 8088
 
 jwt:
@@ -30,6 +30,42 @@ spring:
                 - AddRequestHeader=X-Gateway-Secret, lX4.G9-SecretKey-0ag6o
                 - JwtAuth
                 - RewritePath=/catalog/(?<segment>.*), /$1
+
+            - id: order-service-route
+              uri: lb://order-service
+              predicates:
+                - Path=/order/**
+              filters:
+                - AddRequestHeader=X-Gateway-Secret, lX4.G9-SecretKey-0ag6o
+                - JwtAuth
+                - RewritePath=/order/(?<segment>.*), /$1
+
+            - id: payment-service-route
+              uri: lb://payment-service
+              predicates:
+                - Path=/payment/**
+              filters:
+                - AddRequestHeader=X-Gateway-Secret, lX4.G9-SecretKey-0ag6o
+                - JwtAuth
+                - RewritePath=/payment/(?<segment>.*), /$1
+
+            - id: inventory-service-route
+              uri: lb://inventory-service
+              predicates:
+                - Path=/inventory/**
+              filters:
+                - AddRequestHeader=X-Gateway-Secret, lX4.G9-SecretKey-0ag6o
+                - JwtAuth
+                - RewritePath=/inventory/(?<segment>.*), /$1
+
+            - id: search-service-route
+              uri: lb://search-service
+              predicates:
+                - Path=/search/**
+              filters:
+                - AddRequestHeader=X-Gateway-Secret, lX4.G9-SecretKey-0ag6o
+                - JwtAuth
+                - RewritePath=/search/(?<segment>.*), /$1
 
             # === CẤU HÌNH GRAPHQL CHO AUTH SERVICE ===
             - id: auth-graphql-route

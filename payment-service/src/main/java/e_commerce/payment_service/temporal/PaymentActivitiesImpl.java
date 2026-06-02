@@ -23,7 +23,7 @@ public class PaymentActivitiesImpl implements PaymentActivities {
 
     UserWalletEntity wallet =
         walletRepository
-            .findById(userId)
+            .findByUserId(userId)
             .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của User: " + userId));
 
     if (wallet.getBalance().compareTo(amount) < 0) {
@@ -48,7 +48,7 @@ public class PaymentActivitiesImpl implements PaymentActivities {
 
     UserWalletEntity wallet =
         walletRepository
-            .findById(userId)
+            .findByUserId(userId)
             .orElseThrow(() -> new RuntimeException("Không tìm thấy ví của User: " + userId));
 
     wallet.setBalance(wallet.getBalance().add(amount));

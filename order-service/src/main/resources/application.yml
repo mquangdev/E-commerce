@@ -5,14 +5,14 @@ app:
   security:
     internal-secret: lX4.G9-SecretKey-0ag6o
     gateway-filter:
-      enabled: true
+      enabled: false
 
 spring:
   application:
     name: order-service
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/EC-order
+    url: jdbc:postgresql://localhost:5433/EC-order
     username: admin
     password: admin123
     driver-class-name: org.postgresql.Driver
@@ -40,3 +40,4 @@ eureka:
 
 temporal:
   target: localhost:7233
+  task-queue: ORDER_TASK_QUEUE
