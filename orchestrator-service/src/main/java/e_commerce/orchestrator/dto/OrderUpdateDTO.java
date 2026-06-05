@@ -12,9 +12,10 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class OrderDTO {
+public class OrderUpdateDTO {
   private UUID orderId;
   private UUID userId;
   private BigDecimal amount;
+  private String status;
   private List<OrderItemDTO> orderItems;
 }

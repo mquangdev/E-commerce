@@ -13,4 +13,7 @@ public interface InventoryActivities {
 
   @ActivityMethod
   void compensateStock(UUID orderId, List<OrderItemDTO> items);
+
+  @ActivityMethod
+  void confirmStock(UUID orderId);
 }

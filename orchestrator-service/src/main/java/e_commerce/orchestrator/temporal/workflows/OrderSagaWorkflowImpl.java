@@ -1,6 +1,7 @@
 package e_commerce.orchestrator.temporal.workflows;
 
-import e_commerce.orchestrator.dto.OrderDTO;
+import e_commerce.orchestrator.dto.OrderCreateDTO;
+import e_commerce.orchestrator.dto.OrderUpdateDTO;
 import e_commerce.orchestrator.temporal.activities.InventoryActivities;
 import e_commerce.orchestrator.temporal.activities.OrderActivities;
 import e_commerce.orchestrator.temporal.activities.PaymentActivities;
@@ -67,7 +68,7 @@ public class OrderSagaWorkflowImpl implements OrderSagaWorkflow {
       Workflow.newActivityStub(OrderActivities.class, orderOptions);
 
   @Override
-  public void createOrderSaga(OrderDTO order) {
+  public void createOrderSaga(OrderCreateDTO order) {
     // Khởi tạo bộ điều phối Saga của Temporal
     // setParallelCompensation(false): Các bước rollback sẽ chạy tuần tự theo thứ tự ngược lại
     // (LIFO)
@@ -91,11 +92,47 @@ public class OrderSagaWorkflowImpl implements OrderSagaWorkflow {
               paymentActivities.refundPayment(
                   order.getOrderId(), order.getUserId(), order.getAmount()));
 
-      // --- BƯỚC 4: Chốt đơn thành công 🎉 ---
-      orderActivities.updateStatus(order.getOrderId(), "COMPLETED");
+      // --- BƯỚC 4: Chốt kho (COMMITTED) 📦 ---
+      inventoryActivities.confirmStock(order.getOrderId());
+
+      // --- BƯỚC 5: Chốt đơn thành công 🎉 ---
+      orderActivities.updateStatus(order.getOrderId(), "PROCESSING");
     } catch (ActivityFailure e) {
       System.out.println(
-          "🚨 Luồng Saga thất bại cho đơn: " + order.getOrderId() + ". Kích hoạt hoàn tác...");
+          "🚨 Luồng Saga Tạo mới đơn hàng thất bại cho đơn: "
+              + order.getOrderId()
+              + ". Kích hoạt hoàn tác...");
+      saga.compensate();
+      throw e;
+    }
+  }
+
+  @Override
+  public void cancelOrderSaga(OrderUpdateDTO order) {
+    // Khởi tạo bộ điều phối Saga của Temporal
+    // setParallelCompensation(false): Các bước rollback sẽ chạy tuần tự theo thứ tự ngược lại
+    // (LIFO)
+    Saga.Options sagaOptions = new Saga.Options.Builder().setParallelCompensation(false).build();
+    Saga saga = new Saga(sagaOptions);
+    try {
+      // --- BƯỚC 1: Đổi trạng thái đơn hàng sang CANCELLING ---
+      orderActivities.updateStatus(order.getOrderId(), "CANCELLING");
+      saga.addCompensation(
+          () -> orderActivities.updateStatus(order.getOrderId(), order.getStatus()));
+
+      // --- BƯỚC 2: Trả lại hàng cho kho ---
+      inventoryActivities.compensateStock(order.getOrderId(), order.getOrderItems());
+
+      // --- BƯỚC 3: Hoàn tiền vào ví ---
+      paymentActivities.refundPayment(order.getOrderId(), order.getUserId(), order.getAmount());
+
+      // --- BƯỚC 4: Chốt sổ, hủy đơn thành công ---
+      orderActivities.updateStatus(order.getOrderId(), "CANCELLED");
+    } catch (ActivityFailure e) {
+      System.out.println(
+          "🚨 Luồng Saga Hủy đơn hàng thất bại cho đơn: "
+              + order.getOrderId()
+              + ". Kích hoạt hoàn tác...");
       saga.compensate();
       throw e;
     }
