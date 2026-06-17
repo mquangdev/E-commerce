@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: notification_service
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "e_commerce.common_shared.dtos"
+  mail:
+    host: localhost
+    port: 1025
+    username: # Bỏ trống vì Mailpit local không yêu cầu tài khoản
+    password: # Bỏ trống
+    properties:
+      mail.smtp.auth: false
+      mail.smtp.starttls.enable: false

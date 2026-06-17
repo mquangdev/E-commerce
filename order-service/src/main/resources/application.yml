@@ -31,6 +31,12 @@ spring:
     enabled: true
     contexts: ${SPRING_LIQUIBASE_CONTEXTS:default,seed}
 
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+
 eureka:
   instance:
     prefer-ip-address: true

@@ -1,6 +1,5 @@
-package e_commerce.orchestrator.temporal.workflows;
+package e_commerce.orchestrator.temporal.workflows.order;
 
-import e_commerce.orchestrator.dto.OrderCreateDTO;
 import e_commerce.orchestrator.dto.OrderUpdateDTO;
 import e_commerce.orchestrator.temporal.activities.InventoryActivities;
 import e_commerce.orchestrator.temporal.activities.OrderActivities;
@@ -12,7 +11,7 @@ import io.temporal.workflow.Saga;
 import io.temporal.workflow.Workflow;
 import java.time.Duration;
 
-public class OrderSagaWorkflowImpl implements OrderSagaWorkflow {
+public class CancelOrderSagaWorkflowImpl implements CancelOrderSagaWorkflow {
   // 1. Cấu hình Luật thử lại (Retry Rules) và Thời gian chờ (Timeout) cho các Activity
   private final ActivityOptions orderOptions =
       ActivityOptions.newBuilder()
@@ -66,46 +65,6 @@ public class OrderSagaWorkflowImpl implements OrderSagaWorkflow {
 
   private final OrderActivities orderActivities =
       Workflow.newActivityStub(OrderActivities.class, orderOptions);
-
-  @Override
-  public void createOrderSaga(OrderCreateDTO order) {
-    // Khởi tạo bộ điều phối Saga của Temporal
-    // setParallelCompensation(false): Các bước rollback sẽ chạy tuần tự theo thứ tự ngược lại
-    // (LIFO)
-    Saga.Options sagaOptions = new Saga.Options.Builder().setParallelCompensation(false).build();
-    Saga saga = new Saga(sagaOptions);
-
-    try {
-      // --- BƯỚC 1: Đổi trạng thái đơn hàng sang PENDING ---
-      orderActivities.updateStatus(order.getOrderId(), "PENDING");
-      saga.addCompensation(() -> orderActivities.cancelAndCleanupOrder(order.getOrderId()));
-
-      // --- BƯỚC 2: Gọi Kho giữ hàng loạt sản phẩm  ---
-      inventoryActivities.reserveStock(order.getOrderId(), order.getOrderItems());
-      saga.addCompensation(
-          () -> inventoryActivities.compensateStock(order.getOrderId(), order.getOrderItems()));
-
-      // --- BƯỚC 3: Gọi Thanh toán trừ tiền ---
-      paymentActivities.processPayment(order.getOrderId(), order.getUserId(), order.getAmount());
-      saga.addCompensation(
-          () ->
-              paymentActivities.refundPayment(
-                  order.getOrderId(), order.getUserId(), order.getAmount()));
-
-      // --- BƯỚC 4: Chốt kho (COMMITTED) 📦 ---
-      inventoryActivities.confirmStock(order.getOrderId());
-
-      // --- BƯỚC 5: Chốt đơn thành công 🎉 ---
-      orderActivities.updateStatus(order.getOrderId(), "PROCESSING");
-    } catch (ActivityFailure e) {
-      System.out.println(
-          "🚨 Luồng Saga Tạo mới đơn hàng thất bại cho đơn: "
-              + order.getOrderId()
-              + ". Kích hoạt hoàn tác...");
-      saga.compensate();
-      throw e;
-    }
-  }
 
   @Override
   public void cancelOrderSaga(OrderUpdateDTO order) {

@@ -5,7 +5,7 @@ import io.temporal.workflow.WorkflowInterface;
 import io.temporal.workflow.WorkflowMethod;
 
 @WorkflowInterface
-public interface OrderSagaWorkflow {
+public interface CreateOrderSagaWorkflow {
   @WorkflowMethod
   void createOrderSaga(OrderDTO order);
 }

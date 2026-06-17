@@ -10,7 +10,7 @@
         <module name="eureka_server" />
         <module name="api_gateway" />
       </profile>
-      <profile name="Annotation profile for payment_service" enabled="true">
+      <profile name="Annotation profile for notification_service" enabled="true">
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
@@ -23,6 +23,7 @@
         <module name="auth-service" />
         <module name="order_service" />
         <module name="payment_service" />
+        <module name="notification_service" />
         <module name="catalog_service" />
         <module name="search_service" />
       </profile>
@@ -36,6 +37,7 @@
       <module name="common_shared" options="-parameters" />
       <module name="eureka_server" options="-parameters" />
       <module name="inventory_service" options="-parameters" />
+      <module name="notification_service" options="-parameters" />
       <module name="orchestrator" options="-parameters" />
       <module name="order_service" options="-parameters" />
       <module name="payment_service" options="-parameters" />

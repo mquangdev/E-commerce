@@ -159,3 +159,12 @@ services:
     environment:
       - TEMPORAL_ADDRESS=temporal:7233
       - TEMPORAL_CORS_ORIGINS=http://localhost:3000
+      
+  # 13. MAILPIT (Server giả lập gửi Email Local)
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: mailpit-local
+    ports:
+      - "8025:8025" # 🌐 Cổng này để bạn vào trình duyệt xem giao diện Web hộp thư
+      - "1025:1025" # 📧 Cổng SMTP này để Spring Boot kết nối vào bắn mail
+    restart: always

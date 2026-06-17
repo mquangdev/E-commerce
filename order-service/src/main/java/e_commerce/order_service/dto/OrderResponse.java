@@ -17,6 +17,7 @@ public class OrderResponse {
   private UUID userId;
   private BigDecimal totalAmount;
   private String shippingAddress;
+  private String email;
   private OrderStatus status;
   private long version;
   private LocalDateTime createdAt;

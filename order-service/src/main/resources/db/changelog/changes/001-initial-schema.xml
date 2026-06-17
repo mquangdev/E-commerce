@@ -22,6 +22,9 @@
       <column name="status" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
+      <column name="email" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
       <column name="version" type="BIGINT" defaultValueNumeric="0">
         <constraints nullable="false"/>
       </column>

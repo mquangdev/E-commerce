@@ -1,6 +1,7 @@
 package e_commerce.orchestrator.worker;
 
-import e_commerce.orchestrator.temporal.workflows.OrderSagaWorkflowImpl;
+import e_commerce.orchestrator.temporal.workflows.order.CancelOrderSagaWorkflowImpl;
+import e_commerce.orchestrator.temporal.workflows.order.CreateOrderSagaWorkflowImpl;
 import io.temporal.worker.Worker;
 import io.temporal.worker.WorkerFactory;
 import jakarta.annotation.PostConstruct;
@@ -26,7 +27,8 @@ public class TemporalWorkerRunner {
 
     // 2. Đăng ký các Workflow thực thi (Nhạc trưởng chỉ cần đăng ký Workflow, KHÔNG đăng ký
     // Activity)
-    worker.registerWorkflowImplementationTypes(OrderSagaWorkflowImpl.class);
+    worker.registerWorkflowImplementationTypes(CreateOrderSagaWorkflowImpl.class);
+    worker.registerWorkflowImplementationTypes(CancelOrderSagaWorkflowImpl.class);
 
     // 3. Khởi động Worker chạy ngầm
     workerFactory.start();

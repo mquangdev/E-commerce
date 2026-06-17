@@ -35,6 +35,9 @@ public class OrderEntity {
   @Enumerated(EnumType.STRING)
   private OrderStatus status;
 
+  @Column(name = "email", nullable = false)
+  private String email;
+
   @Version
   @Column(name = "version", nullable = false)
   private long version;

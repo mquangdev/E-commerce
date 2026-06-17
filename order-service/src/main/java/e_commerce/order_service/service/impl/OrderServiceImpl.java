@@ -6,7 +6,7 @@ import e_commerce.order_service.entity.*;
 import e_commerce.order_service.enums.OrderStatus;
 import e_commerce.order_service.repository.*;
 import e_commerce.order_service.service.OrderService;
-import e_commerce.order_service.temporal.workflow.OrderSagaWorkflow;
+import e_commerce.order_service.temporal.workflow.CreateOrderSagaWorkflow;
 import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import java.math.BigDecimal;
@@ -35,6 +35,7 @@ public class OrderServiceImpl implements OrderService {
         OrderEntity.builder()
             .id(orderId)
             .userId(request.getUserId())
+            .email(request.getEmail())
             .shippingAddress(request.getShippingAddress())
             .status(OrderStatus.PENDING)
             .build();
@@ -64,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     // 2. Ánh xạ (Map) dữ liệu sang OrderDTO của Orchestrator 🔄
     List<OrderItemDTO> sagaItems =
         orderItems.stream()
-            .map(item -> new OrderItemDTO(item.getProductId(), item.getQuantity()))
+            .map(item -> new OrderItemDTO(item.getProductId(), item.getQuantity(), item.getUnitPrice()))
             .collect(Collectors.toList());
 
     OrderDTO orderDto =
@@ -72,6 +73,8 @@ public class OrderServiceImpl implements OrderService {
             .orderId(orderId)
             .userId(request.getUserId())
             .amount(totalAmount)
+            .email(request.getEmail())
+            .shippingAddress(request.getShippingAddress())
             .orderItems(sagaItems)
             .build();
 
@@ -83,7 +86,8 @@ public class OrderServiceImpl implements OrderService {
             .build();
 
     // 4. Tạo kết nối ảo (Stub) và kích hoạt luồng bất đồng bộ (Async) 🚀
-    OrderSagaWorkflow workflow = workflowClient.newWorkflowStub(OrderSagaWorkflow.class, options);
+    CreateOrderSagaWorkflow workflow =
+        workflowClient.newWorkflowStub(CreateOrderSagaWorkflow.class, options);
 
     // Sử dụng WorkflowClient.start giúp kích hoạt luồng chạy ngầm, API lập tức trả về phản hồi
     WorkflowClient.start(workflow::createOrderSaga, orderDto);
@@ -134,6 +138,7 @@ public class OrderServiceImpl implements OrderService {
         .userId(entity.getUserId())
         .totalAmount(entity.getTotalAmount())
         .shippingAddress(entity.getShippingAddress())
+        .email(entity.getEmail())
         .status(entity.getStatus())
         .version(entity.getVersion())
         .createdAt(entity.getCreatedAt())

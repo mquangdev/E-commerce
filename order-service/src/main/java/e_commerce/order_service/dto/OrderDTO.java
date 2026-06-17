@@ -16,5 +16,7 @@ public class OrderDTO {
   private UUID orderId;
   private UUID userId;
   private BigDecimal amount;
+  private String email;
+  private String shippingAddress;
   private List<OrderItemDTO> orderItems;
 }

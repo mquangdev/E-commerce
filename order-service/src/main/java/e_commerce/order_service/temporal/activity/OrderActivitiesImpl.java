@@ -1,19 +1,30 @@
 package e_commerce.order_service.temporal.activity;
 
+import e_commerce.common_shared.dtos.SendEmailCommand;
+import e_commerce.order_service.dto.OrderDTO;
 import e_commerce.order_service.entity.OrderEntity;
 import e_commerce.order_service.enums.OrderStatus;
 import e_commerce.order_service.repository.OrderRepository;
+import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
 @RequiredArgsConstructor
 @Slf4j
 public class OrderActivitiesImpl implements OrderActivities {
   private final OrderRepository orderRepository;
+  private final KafkaTemplate<String, Object> kafkaTemplate;
 
   @Override
   @Transactional
@@ -58,5 +69,48 @@ public class OrderActivitiesImpl implements OrderActivities {
     log.info(
         "✅ [ORDER SERVICE] Đã chuyển trạng thái đơn hàng {} sang FAILED và dọn dẹp các mục hàng thành công",
         orderId);
+  }
+
+  @Override
+  public void sendOrderCreatedEmail(OrderDTO order) {
+    System.out.println(
+        "Chuẩn bị gửi lệnh bắn email từ OrderActivities cho đơn: " + order.getOrderId());
+
+    // 1. Khởi tạo dữ liệu params
+    Map<String, Object> params = new HashMap<>();
+    DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("HH:mm - dd/MM/yyyy");
+    DecimalFormat currencyFormat = new DecimalFormat("#,###");
+
+    params.put("customerName", "Khách hàng " + order.getUserId().toString().substring(0, 8));
+    params.put("orderId", order.getOrderId().toString().toUpperCase());
+    params.put("createdAt", LocalDateTime.now().format(dateFormatter));
+    params.put("shippingAddress", order.getShippingAddress());
+    params.put("totalAmount", currencyFormat.format(order.getAmount()) + " đ");
+
+    List<Map<String, Object>> itemsList = new ArrayList<>();
+    for (var item : order.getOrderItems()) {
+      Map<String, Object> itemData = new HashMap<>();
+      itemData.put("productName", "Sản phẩm " + item.getProductId().toString().substring(0, 8));
+      itemData.put("imageUrl", "https://via.placeholder.com/50");
+      itemData.put("quantity", item.getQuantity());
+      itemData.put("unitPrice", currencyFormat.format(item.getUnitPrice()) + " đ");
+      itemsList.add(itemData);
+    }
+    params.put("items", itemsList);
+
+    // 2. Đóng gói Command
+    SendEmailCommand command =
+        SendEmailCommand.builder()
+            .to(order.getEmail())
+            .subject(
+                "Đơn hàng #"
+                    + order.getOrderId().toString().substring(0, 8)
+                    + " đã đặt thành công!")
+            .templateCode("order-created-template")
+            .templateParams(params)
+            .build();
+
+    // 3. Bắn lên Kafka
+    kafkaTemplate.send("send-email-commands", command);
   }
 }
