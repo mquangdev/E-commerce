@@ -2,9 +2,12 @@ package e_commerce.common_shared.exception;
 
 import e_commerce.common_shared.dtos.ErrorResponse;
 import java.time.LocalDateTime;
+import java.util.stream.Collectors;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
@@ -88,6 +91,29 @@ public class GlobalExceptionHandler {
             .message(ex.getMessage()) // Trả về câu thông báo nghiệp vụ chi tiết
             .build();
 
+    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+  }
+
+  @ExceptionHandler(MethodArgumentNotValidException.class)
+  public ResponseEntity<ErrorResponse> handleValidationExceptions(
+      MethodArgumentNotValidException ex) {
+
+    // 1. Rút trích tất cả các câu message lỗi (VD: "Email không được để trống")
+    String errorMessage =
+        ex.getBindingResult().getFieldErrors().stream()
+            .map(FieldError::getDefaultMessage)
+            .collect(Collectors.joining(", ")); // Nếu lỗi nhiều field thì ghép lại bằng dấu phẩy
+
+    // 2. Lắp ráp vào ErrorResponse chuẩn của bạn
+    ErrorResponse errorResponse =
+        ErrorResponse.builder()
+            .timestamp(LocalDateTime.now())
+            .status(HttpStatus.BAD_REQUEST.value())
+            .error(HttpStatus.BAD_REQUEST.getReasonPhrase())
+            .message(errorMessage)
+            .build();
+
+    // 3. Trả về cho Client
     return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
   }
 }

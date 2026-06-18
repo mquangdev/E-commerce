@@ -28,7 +28,7 @@ public class OrderServiceImpl implements OrderService {
 
   @Override
   @Transactional
-  public OrderResponse createOrder(OrderRequest request) {
+  public OrderResponse createOrder(OrderRequest request, String customerFullName) {
     UUID orderId = UUID.randomUUID();
     // 1. Tạo và tính toán hóa đơn như cũ
     OrderEntity order =
@@ -65,7 +65,13 @@ public class OrderServiceImpl implements OrderService {
     // 2. Ánh xạ (Map) dữ liệu sang OrderDTO của Orchestrator 🔄
     List<OrderItemDTO> sagaItems =
         orderItems.stream()
-            .map(item -> new OrderItemDTO(item.getProductId(), item.getQuantity(), item.getUnitPrice()))
+            .map(
+                item ->
+                    new OrderItemDTO(
+                        "san pham test",
+                        item.getProductId(),
+                        item.getQuantity(),
+                        item.getUnitPrice()))
             .collect(Collectors.toList());
 
     OrderDTO orderDto =
@@ -74,6 +80,7 @@ public class OrderServiceImpl implements OrderService {
             .userId(request.getUserId())
             .amount(totalAmount)
             .email(request.getEmail())
+            .customerName(customerFullName)
             .shippingAddress(request.getShippingAddress())
             .orderItems(sagaItems)
             .build();

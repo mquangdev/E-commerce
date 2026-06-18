@@ -41,6 +41,7 @@ public class AuthService {
             .id(userId)
             .username(request.getUsername())
             .email(request.getEmail())
+            .fullName(request.getFullName())
             .passwordHash(passwordEncoder.encode(request.getPassword())) // Băm mật khẩu
             .status(UserStatus.ACTIVE)
             .build();

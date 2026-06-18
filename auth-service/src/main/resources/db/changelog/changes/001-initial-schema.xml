@@ -23,6 +23,9 @@
       <column name="status" type="VARCHAR(20)">
         <constraints nullable="false"/>
       </column>
+      <column name="full_name" type="VARCHAR(255)">
+        <constraints nullable="false"/>
+      </column>
       <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
         <constraints nullable="false"/>
       </column>

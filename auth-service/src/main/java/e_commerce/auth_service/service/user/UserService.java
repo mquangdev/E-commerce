@@ -67,6 +67,7 @@ public class UserService implements UserDetailsService {
             .id(UUID.randomUUID())
             .username(request.getUsername())
             .email(request.getEmail())
+            .fullName(request.getFullName())
             .passwordHash(passwordEncoder.encode(request.getPassword()))
             .status(request.getStatus() != null ? request.getStatus() : UserStatus.ACTIVE)
             .build();
@@ -92,6 +93,7 @@ public class UserService implements UserDetailsService {
     }
 
     user.setEmail(request.getEmail());
+    user.setFullName(request.getFullName());
     if (request.getStatus() != null) {
       user.setStatus(request.getStatus());
     }
@@ -116,6 +118,7 @@ public class UserService implements UserDetailsService {
         .id(user.getId())
         .username(user.getUsername())
         .email(user.getEmail())
+        .fullName(user.getFullName())
         .status(user.getStatus())
         .createdAt(user.getCreatedAt())
         .updatedAt(user.getUpdatedAt())

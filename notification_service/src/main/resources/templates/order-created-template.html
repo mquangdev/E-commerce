@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Xác nhận đơn hàng</title>
+  <style>
+    /* CSS nội tuyến (Inline-style approach) giúp hiển thị tốt trên các trình duyệt mail như Gmail, Outlook */
+    body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; background-color: #f4f5f7; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+    .email-wrapper { width: 100%; background-color: #f4f5f7; padding: 40px 0; }
+    .email-content { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 8px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+    .header { background-color: #4F46E5; color: #ffffff; padding: 25px 20px; text-align: center; }
+    .header h1 { margin: 0; font-size: 24px; font-weight: 600; letter-spacing: 0.5px; }
+    .body-content { padding: 30px 40px; color: #374151; line-height: 1.6; }
+    .greeting { font-size: 18px; font-weight: 600; color: #111827; margin-bottom: 20px; }
+    .order-summary { background-color: #f9fafb; padding: 20px; border-radius: 6px; margin-bottom: 30px; font-size: 14px; border: 1px solid #e5e7eb; }
+    .order-summary p { margin: 8px 0; }
+    .order-summary strong { color: #111827; display: inline-block; width: 140px; }
+    .item-table { width: 100%; border-collapse: collapse; margin-bottom: 25px; }
+    .item-table th { border-bottom: 2px solid #e5e7eb; padding: 12px 8px; text-align: left; font-size: 13px; color: #6b7280; text-transform: uppercase; }
+    .item-table td { padding: 15px 8px; border-bottom: 1px solid #f3f4f6; vertical-align: middle; }
+    .product-img { width: 56px; height: 56px; border-radius: 6px; object-fit: cover; border: 1px solid #e5e7eb; }
+    .product-name { font-weight: 500; color: #111827; font-size: 14px; }
+    .text-center { text-align: center; }
+    .text-right { text-align: right; }
+    .total-section { border-top: 2px solid #d1d5db; }
+    .total-section td { padding-top: 20px; padding-bottom: 5px; font-size: 16px; font-weight: 700; color: #111827; border-bottom: none; }
+    .total-amount { color: #EF4444; font-size: 18px; }
+    .footer { background-color: #f9fafb; padding: 25px; text-align: center; font-size: 13px; color: #6b7280; border-top: 1px solid #e5e7eb; }
+    .footer p { margin: 5px 0; }
+  </style>
+</head>
+<body>
+<div class="email-wrapper">
+  <table class="email-content" width="100%" cellpadding="0" cellspacing="0" border="0">
+    <tr>
+      <td class="header">
+        <h1>Xác Nhận Đơn Hàng</h1>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="body-content">
+        <div class="greeting">Xin chào <span th:text="${customerName}">Khách hàng</span>,</div>
+        <p>Cảm ơn bạn đã mua sắm! Đơn hàng của bạn đã được hệ thống ghi nhận thành công và đang
+          trong quá trình đóng gói. Dưới đây là thông tin chi tiết:</p>
+
+        <div class="order-summary">
+          <p><strong>Mã đơn hàng:</strong> <span style="color: #4F46E5; font-weight: 600;"
+                                                 th:text="${orderId}">#12345678</span></p>
+          <p><strong>Thời gian đặt:</strong> <span th:text="${createdAt}">10:00 - 01/01/2026</span>
+          </p>
+          <p><strong>Địa chỉ giao hàng:</strong> <span th:text="${shippingAddress}">123 Đường Cầu Giấy, Hà Nội</span>
+          </p>
+        </div>
+
+        <table class="item-table" width="100%" cellpadding="0" cellspacing="0" border="0">
+          <thead>
+          <tr>
+            <th colspan="2">Sản phẩm</th>
+            <th class="text-center">SL</th>
+            <th class="text-right">Đơn giá</th>
+          </tr>
+          </thead>
+          <tbody>
+          <tr th:each="item : ${items}">
+            <td style="width: 70px;">
+              <img th:src="${item.imageUrl}" alt="Product" class="product-img"/>
+            </td>
+            <td>
+              <div class="product-name" th:text="${item.productName}">Tên sản phẩm</div>
+            </td>
+            <td class="text-center" th:text="${item.quantity}">1</td>
+            <td class="text-right" th:text="${item.unitPrice}">100,000 đ</td>
+          </tr>
+
+          <tr class="total-section">
+            <td colspan="3" class="text-right">Tổng thanh toán:</td>
+            <td class="text-right total-amount" th:text="${totalAmount}">500,000 đ</td>
+          </tr>
+          </tbody>
+        </table>
+
+        <p style="margin-top: 35px; font-size: 14px; color: #4b5563;">
+          Chúng tôi sẽ gửi thêm một email thông báo ngay khi đơn hàng của bạn được giao cho đơn vị
+          vận chuyển.
+        </p>
+      </td>
+    </tr>
+
+    <tr>
+      <td class="footer">
+        <p>&copy; 2026 Hệ thống E-commerce. Mọi bản quyền được bảo lưu.</p>
+        <p>Đây là email tự động, vui lòng không trả lời email này.</p>
+      </td>
+    </tr>
+  </table>
+</div>
+</body>
+</html>

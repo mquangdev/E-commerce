@@ -19,6 +19,7 @@ public class UpdateUserRequest {
     @Email(message = "Email không đúng định dạng")
     private String email;
 
+    private String fullName;
     private UserStatus status;
     private Set<UUID> roleIds;
 }

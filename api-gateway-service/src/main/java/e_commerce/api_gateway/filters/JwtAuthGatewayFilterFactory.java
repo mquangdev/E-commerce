@@ -51,9 +51,18 @@ public class JwtAuthGatewayFilterFactory
                   return rolesObj != null ? rolesObj.toString() : "";
                 });
 
+        // Trích xuất fullName
+        String fullName =
+            jwtService.extractClaim(token, claims -> claims.get("fullName", String.class));
+
         // 4. TẠO BẢN SAO (mutate) của Request và nhét Header vào
         var modifiedRequest =
-            request.mutate().header("X-User-Id", userId).header("X-User-Roles", roles).build();
+            request
+                .mutate()
+                .header("X-User-Id", userId)
+                .header("X-User-Roles", roles)
+                .header("X-User-FullName", fullName)
+                .build();
 
         // 5. TẠO BẢN SAO của Exchange chứa chiếc Request mới
         var modifiedExchange = exchange.mutate().request(modifiedRequest).build();

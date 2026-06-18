@@ -17,7 +17,9 @@ public class OrderController {
   private final OrderService orderService;
 
   @PostMapping
-  public ResponseEntity<OrderResponse> createOrder(@Valid @RequestBody OrderRequest request) {
+  public ResponseEntity<OrderResponse> createOrder(
+      @Valid @RequestBody OrderRequest request,
+      @RequestHeader(value = "X-User-FullName") String fullName) {
     return ResponseEntity.ok(orderService.createOrder(request));
   }
 
@@ -28,8 +30,7 @@ public class OrderController {
 
   @PutMapping("/{orderId}/status")
   public ResponseEntity<OrderResponse> updateOrderStatus(
-      @PathVariable UUID orderId,
-      @RequestParam OrderStatus status) {
+      @PathVariable UUID orderId, @RequestParam OrderStatus status) {
     return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
   }
 }

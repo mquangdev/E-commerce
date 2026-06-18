@@ -29,6 +29,7 @@
       <column name="email" type="STRING"/>
       <column name="password_hash" type="STRING"/>
       <column name="status" type="STRING"/>
+      <column name="full_name" type="STRING"/>
       <column name="is_deleted" type="BOOLEAN"/>
       <column name="created_at" type="TIMESTAMP"/>
       <column name="updated_at" type="TIMESTAMP"/>

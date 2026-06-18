@@ -51,6 +51,7 @@ public class JwtService {
 
     extraClaims.put("userId", userEntity.getId().toString());
     extraClaims.put("roles", roles);
+    extraClaims.put("fullName", userEntity.getFullName());
 
     return generateToken(extraClaims, userEntity);
   }

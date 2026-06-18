@@ -1,5 +1,6 @@
 package e_commerce.orchestrator.temporal.activities;
 
+import e_commerce.orchestrator.dto.OrderCreateDTO;
 import io.temporal.activity.ActivityInterface;
 import io.temporal.activity.ActivityMethod;
 import java.util.UUID;
@@ -11,4 +12,7 @@ public interface OrderActivities {
 
   @ActivityMethod
   void cancelAndCleanupOrder(UUID orderId);
+
+  @ActivityMethod
+  void sendOrderCreatedEmail(OrderCreateDTO order);
 }

@@ -15,9 +15,9 @@ import java.util.Map;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.kafka.core.KafkaTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -81,7 +81,7 @@ public class OrderActivitiesImpl implements OrderActivities {
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("HH:mm - dd/MM/yyyy");
     DecimalFormat currencyFormat = new DecimalFormat("#,###");
 
-    params.put("customerName", "Khách hàng " + order.getUserId().toString().substring(0, 8));
+    params.put("customerName", "Khách hàng " + order.getCustomerName());
     params.put("orderId", order.getOrderId().toString().toUpperCase());
     params.put("createdAt", LocalDateTime.now().format(dateFormatter));
     params.put("shippingAddress", order.getShippingAddress());
@@ -90,7 +90,7 @@ public class OrderActivitiesImpl implements OrderActivities {
     List<Map<String, Object>> itemsList = new ArrayList<>();
     for (var item : order.getOrderItems()) {
       Map<String, Object> itemData = new HashMap<>();
-      itemData.put("productName", "Sản phẩm " + item.getProductId().toString().substring(0, 8));
+      itemData.put("productName", "Sản phẩm " + item.getProductName());
       itemData.put("imageUrl", "https://via.placeholder.com/50");
       itemData.put("quantity", item.getQuantity());
       itemData.put("unitPrice", currencyFormat.format(item.getUnitPrice()) + " đ");

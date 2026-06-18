@@ -25,6 +25,7 @@ public class CreateUserRequest {
     @NotBlank(message = "Password không được để trống")
     private String password;
 
+    private String fullName;
     private UserStatus status;
     private Set<UUID> roleIds;
 }

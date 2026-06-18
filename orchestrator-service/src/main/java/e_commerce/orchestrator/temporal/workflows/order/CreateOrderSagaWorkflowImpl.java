@@ -96,6 +96,9 @@ public class CreateOrderSagaWorkflowImpl implements CreateOrderSagaWorkflow {
 
       // --- BƯỚC 5: Chốt đơn thành công 🎉 ---
       orderActivities.updateStatus(order.getOrderId(), "PROCESSING");
+
+      // --- BƯỚC 6: Bắn email thông báo ---
+      orderActivities.sendOrderCreatedEmail(order);
     } catch (ActivityFailure e) {
       System.out.println(
           "🚨 Luồng Saga Tạo mới đơn hàng thất bại cho đơn: "
