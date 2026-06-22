@@ -81,7 +81,7 @@ public class OrderActivitiesImpl implements OrderActivities {
     DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("HH:mm - dd/MM/yyyy");
     DecimalFormat currencyFormat = new DecimalFormat("#,###");
 
-    params.put("customerName", "Khách hàng " + order.getCustomerName());
+    params.put("customerName", "Khách hàng " + order.getCustomerFullName());
     params.put("orderId", order.getOrderId().toString().toUpperCase());
     params.put("createdAt", LocalDateTime.now().format(dateFormatter));
     params.put("shippingAddress", order.getShippingAddress());

@@ -47,3 +47,9 @@ eureka:
 temporal:
   target: localhost:7233
   task-queue: ORDER_TASK_QUEUE
+
+grpc:
+  client:
+    catalog-grpc-server:
+      address: 'static://localhost:9090'
+      negotiation-type: plaintext

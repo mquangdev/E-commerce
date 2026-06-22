@@ -86,7 +86,7 @@ class OrderServiceTest {
             eq(CreateOrderSagaWorkflow.class), any(io.temporal.client.WorkflowOptions.class)))
         .thenReturn(createOrderSagaWorkflow);
 
-    OrderResponse response = orderService.createOrder(request);
+    OrderResponse response = orderService.createOrder(request, "testUser");
 
     assertNotNull(response);
     assertEquals(orderId, response.getId());

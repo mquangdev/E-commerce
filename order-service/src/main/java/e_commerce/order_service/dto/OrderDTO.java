@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class OrderDTO {
   private UUID orderId;
   private UUID userId;
-  private String customerName;
+  private String customerFullName;
   private BigDecimal amount;
   private String email;
   private String shippingAddress;

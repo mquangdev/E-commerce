@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "e_commerce.common_shared.grpc.catalog";
+
+service CatalogGrpcService {
+  rpc GetProductsByIds (GetProductsRequest) returns (GetProductsResponse);
+}
+
+message GetProductsRequest {
+  repeated string productIds = 1;
+}
+
+message ProductInfo {
+  string productId = 1;
+  string name = 2;
+  string imageUrl = 3;
+  double price = 4;
+}
+
+message GetProductsResponse {
+  map<string, ProductInfo> productsMap = 1;
+}

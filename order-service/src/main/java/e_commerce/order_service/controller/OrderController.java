@@ -19,8 +19,8 @@ public class OrderController {
   @PostMapping
   public ResponseEntity<OrderResponse> createOrder(
       @Valid @RequestBody OrderRequest request,
-      @RequestHeader(value = "X-User-FullName") String fullName) {
-    return ResponseEntity.ok(orderService.createOrder(request));
+      @RequestHeader(value = "X-User-FullName") String customerFullName) {
+    return ResponseEntity.ok(orderService.createOrder(request, customerFullName));
   }
 
   @GetMapping("/{orderId}")

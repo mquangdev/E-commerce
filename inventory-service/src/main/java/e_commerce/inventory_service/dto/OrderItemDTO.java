@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class OrderItemDTO {
   private UUID productId;
+  private String productName;
   private int quantity;
   private BigDecimal unitPrice;
 }

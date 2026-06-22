@@ -1,9 +1,11 @@
 package e_commerce.order_service.service.impl;
 
 import e_commerce.common_shared.exception.ResourceNotFoundException;
+import e_commerce.common_shared.grpc.catalog.ProductInfo;
 import e_commerce.order_service.dto.*;
 import e_commerce.order_service.entity.*;
 import e_commerce.order_service.enums.OrderStatus;
+import e_commerce.order_service.grpc.CatalogGrpcClientService;
 import e_commerce.order_service.repository.*;
 import e_commerce.order_service.service.OrderService;
 import e_commerce.order_service.temporal.workflow.CreateOrderSagaWorkflow;
@@ -11,6 +13,7 @@ import io.temporal.client.WorkflowClient;
 import io.temporal.client.WorkflowOptions;
 import java.math.BigDecimal;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
@@ -25,11 +28,16 @@ public class OrderServiceImpl implements OrderService {
 
   private final OrderRepository orderRepository;
   private final OrderItemRepository orderItemRepository;
+  private final CatalogGrpcClientService catalogGrpcClientService;
 
   @Override
   @Transactional
   public OrderResponse createOrder(OrderRequest request, String customerFullName) {
     UUID orderId = UUID.randomUUID();
+
+    // Gọi GRPC để lấy dữ liệu sản phẩm
+    Map<String, ProductInfo> productInfoMap = fetchProductDetailsFromCatalog(request.getItems());
+
     // 1. Tạo và tính toán hóa đơn như cũ
     OrderEntity order =
         OrderEntity.builder()
@@ -66,12 +74,11 @@ public class OrderServiceImpl implements OrderService {
     List<OrderItemDTO> sagaItems =
         orderItems.stream()
             .map(
-                item ->
-                    new OrderItemDTO(
-                        "san pham test",
-                        item.getProductId(),
-                        item.getQuantity(),
-                        item.getUnitPrice()))
+                item -> {
+                  String productName = productInfoMap.get(item.getProductId().toString()).getName();
+                  return new OrderItemDTO(
+                      productName, item.getProductId(), item.getQuantity(), item.getUnitPrice());
+                })
             .collect(Collectors.toList());
 
     OrderDTO orderDto =
@@ -80,7 +87,7 @@ public class OrderServiceImpl implements OrderService {
             .userId(request.getUserId())
             .amount(totalAmount)
             .email(request.getEmail())
-            .customerName(customerFullName)
+            .customerFullName(customerFullName)
             .shippingAddress(request.getShippingAddress())
             .orderItems(sagaItems)
             .build();
@@ -100,6 +107,12 @@ public class OrderServiceImpl implements OrderService {
     WorkflowClient.start(workflow::createOrderSaga, orderDto);
 
     return mapToOrderResponse(saved);
+  }
+
+  private Map<String, ProductInfo> fetchProductDetailsFromCatalog(List<OrderItemRequest> items) {
+    List<UUID> requestedProductIds =
+        items.stream().map(OrderItemRequest::getProductId).collect(Collectors.toList());
+    return catalogGrpcClientService.fetchProductDetails(requestedProductIds);
   }
 
   @Override
