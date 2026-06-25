@@ -11,6 +11,10 @@ spring:
   application:
     name: order-service
 
+  autoconfigure:
+    exclude:
+      - net.devh.boot.grpc.client.autoconfigure.GrpcDiscoveryClientAutoConfiguration
+
   datasource:
     url: jdbc:postgresql://localhost:5433/EC-order
     username: admin

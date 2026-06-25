@@ -12,7 +12,7 @@ services:
       - "5433:5432"
     environment:
       POSTGRES_DB: ecommerce_local
-      POSTGRES_USER: admind
+      POSTGRES_USER: admin
       POSTGRES_PASSWORD: admin123
     command: ["postgres", "-c", "wal_level=logical"]
     volumes:

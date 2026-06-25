@@ -9,6 +9,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+
 @Component
 public class JwtAuthGatewayFilterFactory
     extends AbstractGatewayFilterFactory<JwtAuthGatewayFilterFactory.Config> {
@@ -55,13 +58,15 @@ public class JwtAuthGatewayFilterFactory
         String fullName =
             jwtService.extractClaim(token, claims -> claims.get("fullName", String.class));
 
+        String encodedFullName = URLEncoder.encode(fullName, StandardCharsets.UTF_8);
+
         // 4. TẠO BẢN SAO (mutate) của Request và nhét Header vào
         var modifiedRequest =
             request
                 .mutate()
                 .header("X-User-Id", userId)
                 .header("X-User-Roles", roles)
-                .header("X-User-FullName", fullName)
+                .header("X-User-FullName", encodedFullName)
                 .build();
 
         // 5. TẠO BẢN SAO của Exchange chứa chiếc Request mới
