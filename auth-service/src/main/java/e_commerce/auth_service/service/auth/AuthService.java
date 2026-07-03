@@ -10,6 +10,7 @@ import e_commerce.auth_service.repository.refreshToken.RefreshTokenRepository;
 import e_commerce.auth_service.repository.user.UserRepository;
 import e_commerce.auth_service.service.jwt.JwtService;
 import e_commerce.common_shared.exception.AuthException;
+import e_commerce.common_shared.exception.BusinessException;
 import jakarta.servlet.http.Cookie;
 import java.time.LocalDateTime;
 import java.util.Optional;
@@ -35,6 +36,17 @@ public class AuthService {
   public UUID register(RegisterRequest request) {
     // 1. Tạo đối tượng User từ request
     var userId = UUID.randomUUID();
+
+    // Check trùng email, username
+    if (this.userRepository.existsByEmail(request.getEmail())) {
+      throw new BusinessException("Email đã tồn tại");
+    }
+
+    if (this.userRepository.existsByUsername(request.getUsername())) {
+      throw new BusinessException("Tên đăng nhập đã đã tồn tại");
+    }
+
+    // Check trùng username
 
     UserEntity user =
         UserEntity.builder()
