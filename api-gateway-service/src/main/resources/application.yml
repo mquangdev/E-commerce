@@ -11,6 +11,22 @@ spring:
     gateway:
       server:
         webflux:
+          globalcors:
+            add-to-simple-url-handler-mapping: true
+            cors-configurations:
+              '[/**]': # Áp dụng cho mọi đường dẫn API
+                allowedOrigins:
+                  - "http://localhost:3000"
+                allowedMethods:
+                  - GET
+                  - POST
+                  - PUT
+                  - PATCH
+                  - DELETE
+                  - OPTIONS
+                allowedHeaders: "*" # Cho phép mọi header
+                allowCredentials: true # Cho phép gửi kèm cookie/authorization header
+                maxAge: 3600
           routes:
             # 1. TUYEN DUONG PUBLIC (Khong can JWT, chi can Secret)
             - id: auth-service-route
