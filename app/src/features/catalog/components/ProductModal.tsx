@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, Select, message } from 'antd';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { Product, ProductCreateRequest, ProductUpdateRequest } from '../models/Product';
 import { Category } from '../models/Category';
-import { createProduct, updateProduct, getCategories } from '../catalogService';
+import { fetchCategories, createProductThunk, updateProductThunk } from '../catalogSlice';
 
 interface ProductModalProps {
   visible: boolean;
@@ -19,29 +20,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loadingCategories, setLoadingCategories] = useState(false);
+  const dispatch = useAppDispatch();
+  const { categories, categoriesLoading } = useAppSelector((state) => state.catalog);
 
   // Load active categories for Select input
   useEffect(() => {
-    const fetchCategories = async () => {
-      setLoadingCategories(true);
-      try {
-        // Load up to 100 categories for the dropdown selector
-        const data = await getCategories('', 0, 100);
-        // Only show active categories
-        setCategories(data.content.filter(cat => cat.isActive && !cat.isDeleted));
-      } catch (error) {
-        message.error('Không thể tải danh sách danh mục sản phẩm.');
-      } finally {
-        setLoadingCategories(false);
-      }
-    };
-
     if (visible) {
-      fetchCategories();
+      dispatch(fetchCategories({ keyword: '', page: 0, size: 100 }));
     }
-  }, [visible]);
+  }, [visible, dispatch]);
 
   // Set form fields when editing
   useEffect(() => {
@@ -75,7 +62,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           imageUrl: values.imageUrl,
           stockQuantity: values.stockQuantity,
         };
-        await updateProduct(editingProduct.id, payload);
+        await dispatch(updateProductThunk({ id: editingProduct.id, payload })).unwrap();
         message.success('Cập nhật sản phẩm thành công!');
       } else {
         const payload: ProductCreateRequest = {
@@ -87,13 +74,12 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           imageUrl: values.imageUrl,
           stockQuantity: values.stockQuantity,
         };
-        await createProduct(payload);
+        await dispatch(createProductThunk(payload)).unwrap();
         message.success('Thêm sản phẩm mới thành công!');
       }
       onSuccess();
     } catch (error: any) {
-      const errMsg = error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
-      message.error(`Lỗi: ${errMsg}`);
+      message.error(`Lỗi: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -116,7 +102,6 @@ export const ProductModal: React.FC<ProductModalProps> = ({
         layout="vertical"
         onFinish={handleFinish}
         className="pt-4"
-        requiredMark={false}
       >
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           {/* SKU - Unique, cannot change when editing */}
@@ -128,8 +113,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
               { max: 50, message: 'SKU không vượt quá 50 ký tự!' },
             ]}
           >
-            <Input 
-              placeholder="Nhập mã SKU độc nhất (VD: PHONE-IP15-128)" 
+            <Input
+              placeholder="Nhập mã SKU độc nhất (VD: PHONE-IP15-128)"
               disabled={editingProduct !== null}
             />
           </Form.Item>
@@ -142,8 +127,8 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           >
             <Select
               placeholder="Chọn danh mục phân loại"
-              loading={loadingCategories}
-              options={categories.map((cat) => ({
+              loading={categoriesLoading}
+              options={categories.filter(cat => cat.active).map((cat) => ({
                 label: cat.name,
                 value: cat.id,
               }))}
@@ -208,9 +193,9 @@ export const ProductModal: React.FC<ProductModalProps> = ({
           name="description"
           label={<span className="font-semibold text-slate-700 text-xs">Mô tả sản phẩm</span>}
         >
-          <Input.TextArea 
-            rows={4} 
-            placeholder="Nhập mô tả chi tiết, tính năng nổi bật..." 
+          <Input.TextArea
+            rows={4}
+            placeholder="Nhập mô tả chi tiết, tính năng nổi bật..."
             className="resize-none"
           />
         </Form.Item>

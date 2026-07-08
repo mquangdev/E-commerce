@@ -1,6 +1,6 @@
 package e_commerce.catalog_service.commands.dtos;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -17,7 +17,7 @@ public class CategoryResponse {
   private String description;
   private boolean isActive;
   private boolean isDeleted;
-  private LocalDateTime createdAt;
-  private LocalDateTime updatedAt;
+  private LocalDate createdAt;
+  private LocalDate updatedAt;
   private Long version;
 }

@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { Modal, Form, Input, Switch, message } from 'antd';
+import { useAppDispatch } from '@/store/hooks';
 import { Category, CategoryCreateRequest, CategoryUpdateRequest } from '../models/Category';
-import { createCategory, updateCategory } from '../catalogService';
+import { createCategoryThunk, updateCategoryThunk } from '../catalogSlice';
 
 interface CategoryModalProps {
   visible: boolean;
@@ -18,6 +19,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = React.useState(false);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (visible) {
@@ -25,7 +27,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         form.setFieldsValue({
           name: editingCategory.name,
           description: editingCategory.description,
-          isActive: editingCategory.isActive,
+          isActive: editingCategory.active,
         });
       } else {
         form.resetFields();
@@ -43,7 +45,7 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           description: values.description,
           isActive: values.isActive,
         };
-        await updateCategory(editingCategory.id, payload);
+        await dispatch(updateCategoryThunk({ id: editingCategory.id, payload })).unwrap();
         message.success('Cập nhật danh mục thành công!');
       } else {
         const payload: CategoryCreateRequest = {
@@ -51,13 +53,12 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
           description: values.description,
           isActive: values.isActive,
         };
-        await createCategory(payload);
+        await dispatch(createCategoryThunk(payload)).unwrap();
         message.success('Thêm danh mục mới thành công!');
       }
       onSuccess();
     } catch (error: any) {
-      const errMsg = error.response?.data?.message || 'Có lỗi xảy ra, vui lòng thử lại!';
-      message.error(`Lỗi: ${errMsg}`);
+      message.error(`Lỗi: ${error}`);
     } finally {
       setLoading(false);
     }
@@ -80,7 +81,6 @@ export const CategoryModal: React.FC<CategoryModalProps> = ({
         layout="vertical"
         onFinish={handleFinish}
         className="pt-4"
-        requiredMark={false}
       >
         <Form.Item
           name="name"

@@ -21,10 +21,10 @@
       <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
         <constraints nullable="false"/>
       </column>
-      <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+      <column name="created_at" type="DATE" defaultValueComputed="NOW()">
         <constraints nullable="false"/>
       </column>
-      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+      <column name="updated_at" type="DATE" defaultValueComputed="NOW()">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValueNumeric="0">
@@ -57,10 +57,10 @@
       <column name="is_deleted" type="BOOLEAN" defaultValueBoolean="false">
         <constraints nullable="false"/>
       </column>
-      <column name="created_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+      <column name="created_at" type="DATE" defaultValueComputed="NOW()">
         <constraints nullable="false"/>
       </column>
-      <column name="updated_at" type="TIMESTAMP" defaultValueComputed="NOW()">
+      <column name="updated_at" type="DATE" defaultValueComputed="NOW()">
         <constraints nullable="false"/>
       </column>
       <column name="version" type="BIGINT" defaultValueNumeric="0">

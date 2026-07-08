@@ -25,3 +25,9 @@ export const registerApi = async (payload: RegisterPayload): Promise<string> => 
   const response = await api.post<string>(`${AUTH_BASE_URL}/api/v1/register`, payload);
   return response.data;
 };
+
+// Gọi API refresh token, nhận về chuỗi accessToken mới
+export const refreshTokenApi = async (): Promise<string> => {
+  const response = await api.post<string>(`${AUTH_BASE_URL}/api/v1/refresh`);
+  return response.data;
+};

@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Typography, Card, Input, Button, Table, Tag, Popconfirm, Space, Skeleton, Avatar, message } from 'antd';
-import { Search, Plus, Edit, Trash2, Image as ImageIcon, AlertTriangle } from 'lucide-react';
-import { getProducts, deleteProduct } from '../catalogService';
+import { Search, Plus, Edit, Trash2, Image as ImageIcon, AlertTriangle, RotateCw } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchProducts, deleteProductThunk } from '../catalogSlice';
 import { Product } from '../models/Product';
 import { ProductModal } from '../components/ProductModal';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -9,38 +10,31 @@ import { useDebounce } from '@/hooks/useDebounce';
 const { Title, Paragraph } = Typography;
 
 export const ProductManagementPage: React.FC = () => {
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const {
+    products,
+    productsLoading: loading,
+    productsTotal: totalElements,
+  } = useAppSelector((state) => state.catalog);
+
   const [searchKeyword, setSearchKeyword] = useState('');
   const debouncedSearch = useDebounce(searchKeyword, 500);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElements] = useState(0);
 
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
-  const fetchProducts = useCallback(async (keyword: string, pageNum: number, size: number) => {
-    setLoading(true);
-    try {
-      // Backend is 0-based page index, AntD Table is 1-based page index
-      const data = await getProducts(keyword, pageNum - 1, size);
-      // Filter out deleted items (or handle deleted flag)
-      setProducts(data.content.filter(prod => !prod.isDeleted));
-      setTotalElements(data.totalElements);
-    } catch (error) {
-      message.error('Không thể tải danh sách sản phẩm.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadProducts = useCallback((keyword: string, pageNum: number, size: number) => {
+    dispatch(fetchProducts({ keyword, page: pageNum - 1, size }));
+  }, [dispatch]);
 
   useEffect(() => {
-    fetchProducts(debouncedSearch, currentPage, pageSize);
-  }, [debouncedSearch, currentPage, pageSize, fetchProducts]);
+    loadProducts(debouncedSearch, currentPage, pageSize);
+  }, [debouncedSearch, currentPage, pageSize, loadProducts]);
 
   // Handle Search Input Change
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,12 +45,11 @@ export const ProductManagementPage: React.FC = () => {
   // Handle Delete Action
   const handleDelete = async (id: string) => {
     try {
-      await deleteProduct(id);
+      await dispatch(deleteProductThunk(id)).unwrap();
       message.success('Xóa sản phẩm thành công!');
-      fetchProducts(debouncedSearch, currentPage, pageSize);
+      loadProducts(debouncedSearch, currentPage, pageSize);
     } catch (error: any) {
-      const errMsg = error.response?.data?.message || 'Có lỗi xảy ra khi xóa sản phẩm!';
-      message.error(`Lỗi: ${errMsg}`);
+      message.error(`Lỗi: ${error}`);
     }
   };
 
@@ -72,7 +65,7 @@ export const ProductManagementPage: React.FC = () => {
 
   const handleModalSuccess = () => {
     setModalVisible(false);
-    fetchProducts(debouncedSearch, currentPage, pageSize);
+    loadProducts(debouncedSearch, currentPage, pageSize);
   };
 
   // Helper to format currency (assuming VND but adaptable)
@@ -214,15 +207,27 @@ export const ProductManagementPage: React.FC = () => {
             allowClear
           />
 
-          {/* Add Product button */}
-          <Button
-            type="primary"
-            icon={<Plus size={16} className="mr-1" />}
-            onClick={openCreateModal}
-            className="h-10 rounded-xl flex items-center justify-center font-semibold"
-          >
-            Thêm sản phẩm
-          </Button>
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <Button
+              icon={<RotateCw size={16} />}
+              onClick={() => {
+                loadProducts(debouncedSearch, currentPage, pageSize);
+                message.success('Đã làm mới danh sách sản phẩm!');
+              }}
+              loading={loading}
+              className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+              title="Tải lại danh sách"
+            />
+            <Button
+              type="primary"
+              icon={<Plus size={16} className="mr-1" />}
+              onClick={openCreateModal}
+              className="h-10 rounded-xl flex items-center justify-center font-semibold"
+            >
+              Thêm sản phẩm
+            </Button>
+          </div>
         </div>
 
         {/* Products Table or Loading Skeleton */}

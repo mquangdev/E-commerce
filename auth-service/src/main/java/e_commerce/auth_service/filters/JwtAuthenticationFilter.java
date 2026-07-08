@@ -63,4 +63,11 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // Cho phép request đi tiếp đến bộ lọc tiếp theo hoặc vào Controller
     filterChain.doFilter(request, response);
   }
+
+  @Override
+  protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
+    String path = request.getServletPath();
+    // Bỏ qua filter này nếu người dùng gọi các API auth (login, register, refresh)
+    return path.startsWith("/api/v1/auth") || path.equals("/api/v1/login") || path.equals("/api/v1/refresh") || path.equals("/api/v1/register");
+  }
 }

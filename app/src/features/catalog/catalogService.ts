@@ -18,7 +18,7 @@ export const getCategories = async (
   size: number = 10
 ): Promise<PageResponse<Category>> => {
   const response = await api.get<PageResponse<Category>>(
-    `${SEARCH_BASE_URL}/api/search/categories`,
+    `${SEARCH_BASE_URL}/api/categories`,
     {
       params: { keyword, page, size },
     }
@@ -50,7 +50,7 @@ export const getProducts = async (
   size: number = 10
 ): Promise<PageResponse<Product>> => {
   const response = await api.get<PageResponse<Product>>(
-    `${SEARCH_BASE_URL}/api/search/products`,
+    `${SEARCH_BASE_URL}/api/products`,
     {
       params: { keyword, page, size },
     }

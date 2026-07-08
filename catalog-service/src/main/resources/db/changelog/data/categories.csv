@@ -1,5 +1,5 @@
 id,name,description,is_active,is_deleted,created_at,updated_at,version
-c0a80101-25c2-48a0-9774-45371c6dc001,Electronics,Electronic devices and accessories,true,false,2026-05-26 12:00:00,2026-05-26 12:00:00,0
-c0a80101-25c2-48a0-9774-45371c6dc002,Books,Physical and digital books,true,false,2026-05-26 12:00:00,2026-05-26 12:00:00,0
-c0a80101-25c2-48a0-9774-45371c6dc003,Home & Kitchen,Home appliances and kitchenware,true,false,2026-05-26 12:00:00,2026-05-26 12:00:00,0
-c0a80101-25c2-48a0-9774-45371c6dc004,Clothing & Fashion,Apparel and fashion accessories,true,false,2026-05-26 12:00:00,2026-05-26 12:00:00,0
+c0a80101-25c2-48a0-9774-45371c6dc001,Electronics,Electronic devices and accessories,true,false,2026-05-26,2026-05-26,0
+c0a80101-25c2-48a0-9774-45371c6dc002,Books,Physical and digital books,true,false,2026-05-26,2026-05-26,0
+c0a80101-25c2-48a0-9774-45371c6dc003,Home & Kitchen,Home appliances and kitchenware,true,false,2026-05-26,2026-05-26,0
+c0a80101-25c2-48a0-9774-45371c6dc004,Clothing & Fashion,Apparel and fashion accessories,true,false,2026-05-26,2026-05-26,0

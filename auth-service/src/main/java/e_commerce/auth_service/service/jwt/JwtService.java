@@ -21,7 +21,7 @@ public class JwtService {
   @Value("${jwt.secret}")
   private String secretKey;
 
-  private final long jwtExpiration = 900000; // 15 minutes (accessToken)
+  private final long jwtExpiration = 30000; // 15 minutes (accessToken) - 900000
 
   // Trích xuất Username từ Token
   public String extractUsername(String token) {

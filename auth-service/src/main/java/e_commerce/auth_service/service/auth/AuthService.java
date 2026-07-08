@@ -172,8 +172,9 @@ public class AuthService {
   public Cookie createRefreshTokenCookie(String refreshToken) {
     Cookie cookie = new Cookie("refreshToken", refreshToken);
     cookie.setHttpOnly(true); // 🛡️ Chống XSS (JavaScript không đọc được)
-    cookie.setSecure(true); // Chỉ gửi qua HTTPS (trên môi trường thật)
-    cookie.setPath("/api/v1/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setSecure(false); // Chỉ gửi qua HTTPS (trên môi trường thật) - tạm thời tắt để test local
+//    cookie.setPath("/api/v1/refresh"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
+    cookie.setPath("/"); // 🎯 Chỉ gửi Cookie này khi Frontend gọi đúng API refresh
     cookie.setMaxAge(7 * 24 * 60 * 60); // Sống 7 ngày
     return cookie;
   }

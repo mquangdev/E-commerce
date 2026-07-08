@@ -1,46 +1,40 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Typography, Card, Input, Button, Table, Tag, Popconfirm, Space, Skeleton, message } from 'antd';
-import { Search, Plus, Edit, Trash2 } from 'lucide-react';
-import { getCategories, deleteCategory } from '../catalogService';
+import { Search, Plus, Edit, Trash2, RotateCw } from 'lucide-react';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { fetchCategories, deleteCategoryThunk } from '../catalogSlice';
 import { Category } from '../models/Category';
 import { CategoryModal } from '../components/CategoryModal';
-import { useDebounce } from '@/hooks/useDebounce'; // We will create this helper hook
+import { useDebounce } from '@/hooks/useDebounce';
 
 const { Title, Paragraph } = Typography;
 
 export const CategoryManagementPage: React.FC = () => {
-  const [categories, setCategories] = useState<Category[]>([]);
-  const [loading, setLoading] = useState(true);
+  const dispatch = useAppDispatch();
+  const {
+    categories,
+    categoriesLoading: loading,
+    categoriesTotal: totalElements,
+  } = useAppSelector((state) => state.catalog);
+
   const [searchKeyword, setSearchKeyword] = useState('');
   const debouncedSearch = useDebounce(searchKeyword, 500);
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [totalElements, setTotalElements] = useState(0);
 
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
   const [editingCategory, setEditingCategory] = useState<Category | null>(null);
 
-  const fetchCategories = useCallback(async (keyword: string, pageNum: number, size: number) => {
-    setLoading(true);
-    try {
-      // Backend is 0-based page index, AntD Table is 1-based page index
-      const data = await getCategories(keyword, pageNum - 1, size);
-      // Filter out deleted items (or handle deleted flag)
-      setCategories(data.content.filter(cat => !cat.isDeleted));
-      setTotalElements(data.totalElements);
-    } catch (error) {
-      message.error('Không thể tải danh sách danh mục sản phẩm.');
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const loadCategories = useCallback((keyword: string, pageNum: number, size: number) => {
+    dispatch(fetchCategories({ keyword, page: pageNum - 1, size }));
+  }, [dispatch]);
 
   useEffect(() => {
-    fetchCategories(debouncedSearch, currentPage, pageSize);
-  }, [debouncedSearch, currentPage, pageSize, fetchCategories]);
+    loadCategories(debouncedSearch, currentPage, pageSize);
+  }, [debouncedSearch, currentPage, pageSize, loadCategories]);
 
   // Handle Search Input Change
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,13 +45,12 @@ export const CategoryManagementPage: React.FC = () => {
   // Handle Delete Action
   const handleDelete = async (id: string) => {
     try {
-      await deleteCategory(id);
+      await dispatch(deleteCategoryThunk(id)).unwrap();
       message.success('Xóa danh mục thành công!');
       // Reload current page
-      fetchCategories(debouncedSearch, currentPage, pageSize);
+      loadCategories(debouncedSearch, currentPage, pageSize);
     } catch (error: any) {
-      const errMsg = error.response?.data?.message || 'Có lỗi xảy ra khi xóa danh mục!';
-      message.error(`Lỗi: ${errMsg}`);
+      message.error(`Lỗi: ${error}`);
     }
   };
 
@@ -73,7 +66,7 @@ export const CategoryManagementPage: React.FC = () => {
 
   const handleModalSuccess = () => {
     setModalVisible(false);
-    fetchCategories(debouncedSearch, currentPage, pageSize);
+    loadCategories(debouncedSearch, currentPage, pageSize);
   };
 
   const columns = [
@@ -91,12 +84,12 @@ export const CategoryManagementPage: React.FC = () => {
     },
     {
       title: 'Trạng thái',
-      dataIndex: 'isActive',
-      key: 'isActive',
+      dataIndex: 'active',
+      key: 'active',
       width: 150,
-      render: (isActive: boolean) => (
-        <Tag color={isActive ? 'success' : 'error'} className="rounded-full px-3">
-          {isActive ? 'Hoạt động' : 'Tạm khóa'}
+      render: (active: boolean) => (
+        <Tag color={active ? 'success' : 'error'} className="rounded-full px-3">
+          {active ? 'Hoạt động' : 'Ngừng hoạt động'}
         </Tag>
       ),
     },
@@ -105,7 +98,14 @@ export const CategoryManagementPage: React.FC = () => {
       dataIndex: 'createdAt',
       key: 'createdAt',
       width: 200,
-      render: (date: string) => new Date(date).toLocaleString('vi-VN'),
+      render: (date: string) => {
+        if (!date) return '';
+        const parts = date.split('-');
+        if (parts.length === 3) {
+          return `${parts[2]}/${parts[1]}/${parts[0]}`;
+        }
+        return new Date(date).toLocaleDateString('vi-VN');
+      },
     },
     {
       title: 'Hành động',
@@ -164,15 +164,27 @@ export const CategoryManagementPage: React.FC = () => {
             allowClear
           />
 
-          {/* Add Category button */}
-          <Button
-            type="primary"
-            icon={<Plus size={16} className="mr-1" />}
-            onClick={openCreateModal}
-            className="h-10 rounded-xl flex items-center justify-center font-semibold"
-          >
-            Thêm danh mục
-          </Button>
+          {/* Actions */}
+          <div className="flex items-center gap-2">
+            <Button
+              icon={<RotateCw size={16} />}
+              onClick={() => {
+                loadCategories(debouncedSearch, currentPage, pageSize);
+                message.success('Đã làm mới danh mục sản phẩm!');
+              }}
+              loading={loading}
+              className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+              title="Tải lại danh sách"
+            />
+            <Button
+              type="primary"
+              icon={<Plus size={16} className="mr-1" />}
+              onClick={openCreateModal}
+              className="h-10 rounded-xl flex items-center justify-center font-semibold"
+            >
+              Thêm danh mục
+            </Button>
+          </div>
         </div>
 
         {/* Categories Table or Loading Skeleton */}

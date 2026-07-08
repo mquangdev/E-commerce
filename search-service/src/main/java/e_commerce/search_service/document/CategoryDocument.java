@@ -1,12 +1,14 @@
 package e_commerce.search_service.document;
 
-import java.time.LocalDateTime;
 import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.DateFormat;
 import org.springframework.data.elasticsearch.annotations.Document;
 import org.springframework.data.elasticsearch.annotations.Field;
 import org.springframework.data.elasticsearch.annotations.FieldType;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Document(indexName = "categories")
 @Data
@@ -23,14 +25,13 @@ public class CategoryDocument {
   private boolean isActive;
 
   // --- Các trường phẳng hóa từ BaseEntity ---
-  @Field(type = FieldType.Boolean)
   private boolean isDeleted;
 
-  @Field(type = FieldType.Date, format = DateFormat.date_time)
-  private LocalDateTime createdAt;
+  @Field(type = FieldType.Date)
+  private LocalDate createdAt;
 
-  @Field(type = FieldType.Date, format = DateFormat.date_time)
-  private LocalDateTime updatedAt;
+  @Field(type = FieldType.Date)
+  private LocalDate updatedAt;
 
   @Field(type = FieldType.Long)
   private Long version;

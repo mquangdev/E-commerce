@@ -86,6 +86,7 @@ public class ProductCommandService {
     return ProductResponse.builder()
         .id(entity.getId())
         .categoryId(entity.getCategory().getId())
+        .categoryName(entity.getCategory().getName())
         .sku(entity.getSku())
         .name(entity.getName())
         .description(entity.getDescription())

@@ -2,7 +2,7 @@ export interface Category {
   id: string;
   name: string;
   description: string | null;
-  isActive: boolean;
+  active: boolean;
   isDeleted: boolean;
   createdAt: string;
   updatedAt: string;

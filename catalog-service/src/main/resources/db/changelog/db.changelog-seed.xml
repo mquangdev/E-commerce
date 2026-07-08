@@ -15,8 +15,8 @@
       <column name="description" type="STRING"/>
       <column name="is_active" type="BOOLEAN"/>
       <column name="is_deleted" type="BOOLEAN"/>
-      <column name="created_at" type="TIMESTAMP"/>
-      <column name="updated_at" type="TIMESTAMP"/>
+      <column name="created_at" type="DATE"/>
+      <column name="updated_at" type="DATE"/>
       <column name="version" type="NUMERIC"/>
     </loadData>
   </changeSet>
@@ -35,8 +35,8 @@
       <column name="image_url" type="STRING"/>
       <column name="stock_quantity" type="NUMERIC"/>
       <column name="is_deleted" type="BOOLEAN"/>
-      <column name="created_at" type="TIMESTAMP"/>
-      <column name="updated_at" type="TIMESTAMP"/>
+      <column name="created_at" type="DATE"/>
+      <column name="updated_at" type="DATE"/>
       <column name="version" type="NUMERIC"/>
     </loadData>
   </changeSet>

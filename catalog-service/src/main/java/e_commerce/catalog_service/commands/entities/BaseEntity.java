@@ -1,7 +1,7 @@
 package e_commerce.catalog_service.commands.entities;
 
 import jakarta.persistence.*;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -19,10 +19,10 @@ public class BaseEntity {
   private boolean isDeleted = false;
 
   @Column(name = "created_at", nullable = false, updatable = false)
-  private LocalDateTime createdAt;
+  private LocalDate createdAt;
 
   @Column(name = "updated_at", nullable = false)
-  private LocalDateTime updatedAt;
+  private LocalDate updatedAt;
 
   @Column(name = "version", nullable = false)
   @Version
@@ -30,13 +30,13 @@ public class BaseEntity {
 
   @PrePersist
   protected void onCreate() {
-    this.createdAt = LocalDateTime.now();
-    this.updatedAt = LocalDateTime.now();
+    this.createdAt = LocalDate.now();
+    this.updatedAt = LocalDate.now();
     this.isDeleted = false;
   }
 
   @PreUpdate
   protected void onUpdate() {
-    this.updatedAt = LocalDateTime.now();
+    this.updatedAt = LocalDate.now();
   }
 }
