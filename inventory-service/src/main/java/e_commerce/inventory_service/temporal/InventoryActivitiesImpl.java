@@ -30,7 +30,7 @@ public class InventoryActivitiesImpl implements InventoryActivities {
     for (OrderItemDTO item : items) {
       InventoryEntity inventory =
           inventoryRepository
-              .findById(item.getProductId())
+              .findByProductId(item.getProductId())
               .orElseThrow(
                   () ->
                       new EntityNotFoundException(
@@ -77,7 +77,7 @@ public class InventoryActivitiesImpl implements InventoryActivities {
       // Trong luồng bù trừ (rollback), chúng ta nên dùng ifPresent để tránh ném lỗi
       // làm gián đoạn quá trình cứu vãn dữ liệu của các món hàng khác.
       inventoryRepository
-          .findById(item.getProductId())
+          .findByProductId(item.getProductId())
           .ifPresent(
               inventory -> {
                 inventory.setAvailableQuantity(

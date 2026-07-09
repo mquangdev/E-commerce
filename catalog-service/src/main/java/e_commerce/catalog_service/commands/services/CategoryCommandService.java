@@ -22,7 +22,7 @@ public class CategoryCommandService {
   @Transactional
   public CategoryResponse createCategory(CategoryCreateRequest request) {
     if (categoryRepository.existsByName(request.getName())) {
-      throw new ResourceAlreadyExistsException("Tên catalog đã tồn tại");
+      throw new ResourceAlreadyExistsException("Tên danh mục đã tồn tại");
     }
 
     CategoryEntity category =
@@ -44,11 +44,11 @@ public class CategoryCommandService {
         categoryRepository
             .findByIdAndIsDeletedFalse(id)
             .orElseThrow(
-                () -> new ResourceNotFoundException("Không tìm thấy catalog với ID: " + id));
+                () -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
     if (!category.getName().equalsIgnoreCase(request.getName())
         && categoryRepository.existsByName(request.getName())) {
-      throw new ResourceAlreadyExistsException("Tên catalog đã tồn tại");
+      throw new ResourceAlreadyExistsException("Tên danh mục đã tồn tại");
     }
 
     category.setName(request.getName());
@@ -68,7 +68,7 @@ public class CategoryCommandService {
         categoryRepository
             .findByIdAndIsDeletedFalse(id)
             .orElseThrow(
-                () -> new ResourceNotFoundException("Không tìm thấy catalog với ID: " + id));
+                () -> new ResourceNotFoundException("Không tìm thấy danh mục với ID: " + id));
 
     category.setDeleted(true);
     categoryRepository.save(category);

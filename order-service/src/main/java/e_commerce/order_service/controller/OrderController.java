@@ -1,5 +1,6 @@
 package e_commerce.order_service.controller;
 
+import e_commerce.common_shared.dtos.PageResponse;
 import e_commerce.order_service.dto.*;
 import e_commerce.order_service.enums.OrderStatus;
 import e_commerce.order_service.service.OrderService;
@@ -35,5 +36,14 @@ public class OrderController {
   public ResponseEntity<OrderResponse> updateOrderStatus(
       @PathVariable UUID orderId, @RequestParam OrderStatus status) {
     return ResponseEntity.ok(orderService.updateOrderStatus(orderId, status));
+  }
+
+  @GetMapping("/search")
+  public ResponseEntity<PageResponse<OrderResponse>> getOrders(
+          @RequestParam(required = false) String keyword,
+          @RequestParam(defaultValue = "0") int page,
+          @RequestParam(defaultValue = "10") int size
+  ){
+    return ResponseEntity.ok(orderService.getOrders(keyword, page, size));
   }
 }

@@ -14,6 +14,7 @@ import {
   ChevronLeft,
   ChevronRight,
   ShoppingCart,
+  ShoppingBag,
   Bell,
   Sun,
   Moon
@@ -51,6 +52,11 @@ export const AdminLayout: React.FC = () => {
       icon: <Package size={18} />,
       label: 'Quản lý sản phẩm',
     },
+    {
+      key: '/admin/orders',
+      icon: <ShoppingBag size={18} />,
+      label: 'Quản lý đơn hàng',
+    },
   ];
 
   // Generate breadcrumbs from path
@@ -70,6 +76,7 @@ export const AdminLayout: React.FC = () => {
       if (name === 'admin') title = 'Quản trị';
       if (name === 'categories') title = 'Danh mục';
       if (name === 'products') title = 'Sản phẩm';
+      if (name === 'orders') title = 'Đơn hàng';
 
       breadcrumbItems.push({
         title: isLast ? <span>{title}</span> : <Link to={routeTo}>{title}</Link>,

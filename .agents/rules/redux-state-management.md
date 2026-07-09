@@ -1,3 +1,9 @@
+---
+trigger: always_on
+glob: "app/src/**/*.{ts,tsx}"
+description: "Quy chuẩn quản lý State bằng Redux Toolkit (Slices, Thunks, store) trong dự án React"
+---
+
 # Quy chuẩn Quản lý Trạng thái với Redux Toolkit (redux-state-management.md)
 
 Tài liệu này đặc tả quy định kiến trúc bắt buộc của dự án: **Mọi tính năng (feature) trong hệ thống đều phải sử dụng Redux Toolkit để quản lý trạng thái thông qua Redux Slice.** Việc sử dụng local state (React `useState`) cho các dữ liệu nghiệp vụ quan trọng từ API là không được phép.
@@ -17,7 +23,7 @@ Tất cả các tính năng đặt tại `src/features/<feature-name>/` phải t
    * Cập nhật trạng thái thông qua các reducers (`extraReducers` cho async thunks).
 3. **UI Layer (Components/Pages)**:
    * Chỉ lấy dữ liệu thông qua hook `useAppSelector`.
-   * Thực hiện các hành động thay đổi dữ liệu thông qua việc `dispatch` các thunks holặc actions bằng `useAppDispatch`.
+   * Thực hiện các hành động thay đổi dữ liệu thông qua việc `dispatch` các thunks hoặc actions bằng `useAppDispatch`.
    * Không tự ý gọi trực tiếp các hàm trong Service Layer tại Component.
 
 ---

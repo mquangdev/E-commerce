@@ -1,3 +1,9 @@
+---
+trigger: always_on
+glob: "*"
+description: "Quy chuẩn phát triển mã nguồn chung, cấu trúc dự án và quy tắc đặt tên"
+---
+
 # Hướng dẫn Phát triển & Quy chuẩn Viết Code (development-guidelines.md)
 
 Tài liệu này hướng dẫn chi tiết cách tổ chức mã nguồn, viết code TypeScript, quản lý trạng thái (State) và giao tiếp API với Backend cho dự án Frontend.

@@ -1,10 +1,11 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Card, Input, Button, Table, Tag, Popconfirm, Space, Skeleton, Avatar, message } from 'antd';
-import { Search, Plus, Edit, Trash2, Image as ImageIcon, AlertTriangle, RotateCw } from 'lucide-react';
+import { Typography, Card, Input, Button, Table, Pagination, Tag, Popconfirm, Space, Skeleton, Avatar, message } from 'antd';
+import { Search, Plus, Edit, Trash2, Image as ImageIcon, AlertTriangle, RotateCw, PackagePlus } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchProducts, deleteProductThunk } from '../catalogSlice';
 import { Product } from '../models/Product';
 import { ProductModal } from '../components/ProductModal';
+import { ProductStockInModal } from '../components/ProductStockInModal';
 import { useDebounce } from '@/hooks/useDebounce';
 
 const { Title, Paragraph } = Typography;
@@ -27,6 +28,10 @@ export const ProductManagementPage: React.FC = () => {
   // Modal states
   const [modalVisible, setModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+
+  // Stock-in modal states
+  const [stockInVisible, setStockInVisible] = useState(false);
+  const [stockInProduct, setStockInProduct] = useState<Product | null>(null);
 
   const loadProducts = useCallback((keyword: string, pageNum: number, size: number) => {
     dispatch(fetchProducts({ keyword, page: pageNum - 1, size }));
@@ -68,6 +73,17 @@ export const ProductManagementPage: React.FC = () => {
     loadProducts(debouncedSearch, currentPage, pageSize);
   };
 
+  const openStockInModal = (product: Product) => {
+    setStockInProduct(product);
+    setStockInVisible(true);
+  };
+
+  const handleStockInSuccess = () => {
+    setStockInVisible(false);
+    setStockInProduct(null);
+    loadProducts(debouncedSearch, currentPage, pageSize);
+  };
+
   // Helper to format currency (assuming VND but adaptable)
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('vi-VN', {
@@ -96,6 +112,7 @@ export const ProductManagementPage: React.FC = () => {
       title: 'Tên sản phẩm',
       dataIndex: 'name',
       key: 'name',
+      width: 250,
       className: 'font-semibold text-slate-800',
       render: (name: string, record: Product) => (
         <div className="flex flex-col">
@@ -124,7 +141,7 @@ export const ProductManagementPage: React.FC = () => {
       render: (price: number) => formatCurrency(price),
     },
     {
-      title: 'Tồn kho',
+      title: 'Số lượng nhập',
       dataIndex: 'stockQuantity',
       key: 'stockQuantity',
       width: 160,
@@ -153,14 +170,23 @@ export const ProductManagementPage: React.FC = () => {
     {
       title: 'Hành động',
       key: 'actions',
-      width: 130,
+      width: 150,
+      fixed: 'right' as const,
       render: (_: any, record: Product) => (
         <Space size="middle">
+          <Button
+            type="text"
+            icon={<PackagePlus size={16} className="text-amber-600" />}
+            onClick={() => openStockInModal(record)}
+            className="flex items-center justify-center hover:bg-amber-50"
+            title="Nhập thêm sản phẩm"
+          />
           <Button
             type="text"
             icon={<Edit size={16} className="text-blue-600" />}
             onClick={() => openEditModal(record)}
             className="flex items-center justify-center hover:bg-blue-50"
+            title="Chỉnh sửa"
           />
           <Popconfirm
             title="Xóa sản phẩm"
@@ -175,6 +201,7 @@ export const ProductManagementPage: React.FC = () => {
               danger
               icon={<Trash2 size={16} />}
               className="flex items-center justify-center hover:bg-red-50"
+              title="Xóa"
             />
           </Popconfirm>
         </Space>
@@ -196,7 +223,8 @@ export const ProductManagementPage: React.FC = () => {
 
       {/* Main Controls Card */}
       <Card className="shadow-sm border-slate-200/80 rounded-2xl" bodyStyle={{ padding: '1.5rem' }}>
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
+        {/* Dòng 1: Tìm kiếm & Phân trang */}
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-4">
           {/* Search bar */}
           <Input
             prefix={<Search size={16} className="text-slate-400 mr-2" />}
@@ -207,27 +235,41 @@ export const ProductManagementPage: React.FC = () => {
             allowClear
           />
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              icon={<RotateCw size={16} />}
-              onClick={() => {
-                loadProducts(debouncedSearch, currentPage, pageSize);
-                message.success('Đã làm mới danh sách sản phẩm!');
-              }}
-              loading={loading}
-              className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
-              title="Tải lại danh sách"
-            />
-            <Button
-              type="primary"
-              icon={<Plus size={16} className="mr-1" />}
-              onClick={openCreateModal}
-              className="h-10 rounded-xl flex items-center justify-center font-semibold"
-            >
-              Thêm sản phẩm
-            </Button>
-          </div>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalElements}
+            showSizeChanger
+            pageSizeOptions={['10', '20', '50']}
+            showTotal={(total) => `Tổng số: ${total} sản phẩm`}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            }}
+            size="small"
+            className="flex items-center justify-end text-slate-600"
+          />
+        </div>
+
+        {/* Dòng 2: Cụm nút hành động - Căn trái */}
+        <div className="flex justify-start items-center gap-2 mb-6">
+          <Button
+            icon={<RotateCw size={16} />}
+            onClick={() => {
+              loadProducts(debouncedSearch, currentPage, pageSize);
+              message.success('Đã làm mới danh sách sản phẩm!');
+            }}
+            loading={loading}
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+            title="Tải lại danh sách"
+          />
+          <Button
+            type="primary"
+            icon={<Plus size={16} />}
+            onClick={openCreateModal}
+            className="h-10 w-10 rounded-xl flex items-center justify-center"
+            title="Thêm sản phẩm"
+          />
         </div>
 
         {/* Products Table or Loading Skeleton */}
@@ -241,18 +283,8 @@ export const ProductManagementPage: React.FC = () => {
             columns={columns}
             rowKey="id"
             loading={loading}
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              total: totalElements,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
-              onChange: (page, size) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              },
-              className: 'pt-4',
-            }}
+            pagination={false}
+            scroll={{ x: 'max-content' }}
             className="border-slate-100 rounded-xl overflow-hidden"
           />
         )}
@@ -264,6 +296,17 @@ export const ProductManagementPage: React.FC = () => {
         onCancel={() => setModalVisible(false)}
         onSuccess={handleModalSuccess}
         editingProduct={editingProduct}
+      />
+
+      {/* Product Stock In Modal */}
+      <ProductStockInModal
+        visible={stockInVisible}
+        onCancel={() => {
+          setStockInVisible(false);
+          setStockInProduct(null);
+        }}
+        onSuccess={handleStockInSuccess}
+        product={stockInProduct}
       />
     </div>
   );

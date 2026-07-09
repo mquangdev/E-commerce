@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Card, Input, Button, Table, Tag, Popconfirm, Space, Skeleton, message } from 'antd';
+import { Typography, Card, Input, Button, Table, Pagination, Tag, Popconfirm, Space, Skeleton, message } from 'antd';
 import { Search, Plus, Edit, Trash2, RotateCw } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { fetchCategories, deleteCategoryThunk } from '../catalogSlice';
@@ -66,7 +66,7 @@ export const CategoryManagementPage: React.FC = () => {
 
   const handleModalSuccess = () => {
     setModalVisible(false);
-    loadCategories(debouncedSearch, currentPage, pageSize);
+    // loadCategories(debouncedSearch, currentPage, pageSize);
   };
 
   const columns = [
@@ -153,7 +153,8 @@ export const CategoryManagementPage: React.FC = () => {
 
       {/* Main Controls Card */}
       <Card className="shadow-sm border-slate-200/80 rounded-2xl" bodyStyle={{ padding: '1.5rem' }}>
-        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-6">
+        {/* Dòng 1: Tìm kiếm & Phân trang */}
+        <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4 mb-4">
           {/* Search bar */}
           <Input
             prefix={<Search size={16} className="text-slate-400 mr-2" />}
@@ -164,27 +165,41 @@ export const CategoryManagementPage: React.FC = () => {
             allowClear
           />
 
-          {/* Actions */}
-          <div className="flex items-center gap-2">
-            <Button
-              icon={<RotateCw size={16} />}
-              onClick={() => {
-                loadCategories(debouncedSearch, currentPage, pageSize);
-                message.success('Đã làm mới danh mục sản phẩm!');
-              }}
-              loading={loading}
-              className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
-              title="Tải lại danh sách"
-            />
-            <Button
-              type="primary"
-              icon={<Plus size={16} className="mr-1" />}
-              onClick={openCreateModal}
-              className="h-10 rounded-xl flex items-center justify-center font-semibold"
-            >
-              Thêm danh mục
-            </Button>
-          </div>
+          <Pagination
+            current={currentPage}
+            pageSize={pageSize}
+            total={totalElements}
+            showSizeChanger
+            pageSizeOptions={['10', '20', '50']}
+            showTotal={(total) => `Tổng số: ${total} danh mục`}
+            onChange={(page, size) => {
+              setCurrentPage(page);
+              setPageSize(size);
+            }}
+            size="small"
+            className="flex items-center justify-end text-slate-600"
+          />
+        </div>
+
+        {/* Dòng 2: Cụm nút hành động - Căn trái */}
+        <div className="flex justify-start items-center gap-2 mb-6">
+          <Button
+            icon={<RotateCw size={16} />}
+            onClick={() => {
+              loadCategories(debouncedSearch, currentPage, pageSize);
+              message.success('Đã làm mới danh mục sản phẩm!');
+            }}
+            loading={loading}
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+            title="Tải lại danh sách"
+          />
+          <Button
+            type="primary"
+            icon={<Plus size={16} />}
+            onClick={openCreateModal}
+            className="h-10 w-10 rounded-xl flex items-center justify-center"
+            title="Thêm danh mục"
+          />
         </div>
 
         {/* Categories Table or Loading Skeleton */}
@@ -198,18 +213,7 @@ export const CategoryManagementPage: React.FC = () => {
             columns={columns}
             rowKey="id"
             loading={loading}
-            pagination={{
-              current: currentPage,
-              pageSize: pageSize,
-              total: totalElements,
-              showSizeChanger: true,
-              pageSizeOptions: ['10', '20', '50'],
-              onChange: (page, size) => {
-                setCurrentPage(page);
-                setPageSize(size);
-              },
-              className: 'pt-4',
-            }}
+            pagination={false}
             className="border-slate-100 rounded-xl overflow-hidden"
           />
         )}

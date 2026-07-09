@@ -32,7 +32,4 @@ public class ProductUpdateRequest {
 
   @Size(max = 500, message = "Đường dẫn hình ảnh không vượt quá 500 ký tự")
   private String imageUrl;
-
-  @Min(value = 0, message = "Số lượng tồn kho không được nhỏ hơn 0")
-  private int stockQuantity;
 }

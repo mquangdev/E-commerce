@@ -65,7 +65,6 @@ public class ProductCommandService {
     product.setDescription(request.getDescription());
     product.setPrice(request.getPrice());
     product.setImageUrl(request.getImageUrl());
-    product.setStockQuantity(request.getStockQuantity());
 
     ProductEntity saved = productRepository.save(product);
     outboxEventService.insertOutboxEvent("UPDATE", "products", saved.getId(), mapToResponse(saved));

@@ -2,15 +2,20 @@ import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
 import { loginApi, registerApi, LoginPayload, RegisterPayload } from './authService';
 import axios from 'axios';
 import { message } from 'antd';
+import { decodeJwt, JwtPayload } from '@/utils/jwtHelper';
 
 interface AuthState {
   token: string | null;
+  user: JwtPayload | null;
   status: 'idle' | 'loading' | 'succeeded' | 'failed';
   error: string | null;
 }
 
+const token = localStorage.getItem('token');
+
 const initialState: AuthState = {
-  token: localStorage.getItem('token'),
+  token,
+  user: token ? decodeJwt(token) : null,
   status: 'idle',
   error: null,
 };
@@ -57,6 +62,7 @@ const authSlice = createSlice({
   reducers: {
     logoutUser: (state) => {
       state.token = null;
+      state.user = null;
       state.status = 'idle';
       state.error = null;
       localStorage.removeItem('token');
@@ -75,6 +81,7 @@ const authSlice = createSlice({
       .addCase(loginUser.fulfilled, (state, action: PayloadAction<string>) => {
         state.status = 'succeeded';
         state.token = action.payload;
+        state.user = decodeJwt(action.payload);
         state.error = null;
         localStorage.setItem('token', action.payload);
       })

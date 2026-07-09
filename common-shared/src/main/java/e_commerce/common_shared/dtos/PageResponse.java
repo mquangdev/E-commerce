@@ -1,9 +1,10 @@
-package e_commerce.search_service.dto;
+package e_commerce.common_shared.dtos;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.domain.Page;
+
 import java.io.Serializable;
 import java.util.List;
 

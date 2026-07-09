@@ -1,3 +1,9 @@
+---
+trigger: always_on
+glob: "app/src/**/*"
+description: "Hệ thống thiết kế UI, bảng màu, font chữ Inter và khoảng cách spacing chuẩn"
+---
+
 # Hệ thống Thiết kế & Đồng bộ Styling (design-system.md)
 
 Tài liệu này định nghĩa hệ thống thiết kế (Design System) của ứng dụng và các quy tắc kết hợp giữa **Tailwind CSS v4** và **Ant Design v5**. Việc tuân thủ tài liệu này giúp đảm bảo giao diện luôn đồng bộ về màu sắc, khoảng cách và kiểu dáng.

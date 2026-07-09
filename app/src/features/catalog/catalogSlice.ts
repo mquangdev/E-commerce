@@ -11,6 +11,8 @@ import {
   updateProduct,
   deleteProduct,
   PageResponse,
+  InventoryResponse,
+  getProductInventory,
 } from './catalogService';
 
 export interface CatalogState {
@@ -27,6 +29,10 @@ export interface CatalogState {
   productsTotal: number;
   productsPages: number;
   productsPageNum: number;
+
+  currentProductInventory: InventoryResponse | null;
+  currentProductInventoryLoading: boolean;
+  currentProductInventoryError: string | null;
 }
 
 const initialState: CatalogState = {
@@ -43,6 +49,10 @@ const initialState: CatalogState = {
   productsTotal: 0,
   productsPages: 0,
   productsPageNum: 0,
+
+  currentProductInventory: null,
+  currentProductInventoryLoading: false,
+  currentProductInventoryError: null,
 };
 
 // === CATEGORIES THUNKS ===
@@ -145,6 +155,18 @@ export const deleteProductThunk = createAsyncThunk(
   }
 );
 
+export const fetchProductInventory = createAsyncThunk(
+  'catalog/fetchProductInventory',
+  async (productId: string, thunkAPI) => {
+    try {
+      return await getProductInventory(productId);
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Không thể tải thông tin tồn kho.';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 const catalogSlice = createSlice({
   name: 'catalog',
   initialState,
@@ -152,6 +174,10 @@ const catalogSlice = createSlice({
     clearErrors: (state) => {
       state.categoriesError = null;
       state.productsError = null;
+    },
+    clearCurrentInventory: (state) => {
+      state.currentProductInventory = null;
+      state.currentProductInventoryError = null;
     },
   },
   extraReducers: (builder) => {
@@ -173,6 +199,13 @@ const catalogSlice = createSlice({
         state.categoriesError = action.payload as string;
       })
 
+      // Add category
+      .addCase(createCategoryThunk.fulfilled, (state, action) => {
+        state.categories.unshift(action.payload);
+        state.categoriesTotal++;
+        state.categoriesError = null;
+      })
+
       // Fetch Products
       .addCase(fetchProducts.pending, (state) => {
         state.productsLoading = true;
@@ -188,9 +221,32 @@ const catalogSlice = createSlice({
       .addCase(fetchProducts.rejected, (state, action) => {
         state.productsLoading = false;
         state.productsError = action.payload as string;
+      })
+
+      // Add product
+      .addCase(createProductThunk.fulfilled, (state, action) => {
+        state.products.unshift(action.payload);
+        state.productsTotal++;
+        state.productsError = null;
+      })
+
+      // Fetch Product Inventory
+      .addCase(fetchProductInventory.pending, (state) => {
+        state.currentProductInventoryLoading = true;
+        state.currentProductInventoryError = null;
+      })
+      .addCase(fetchProductInventory.fulfilled, (state, action: PayloadAction<InventoryResponse>) => {
+        state.currentProductInventoryLoading = false;
+        state.currentProductInventory = action.payload;
+        state.currentProductInventoryError = null;
+      })
+      .addCase(fetchProductInventory.rejected, (state, action) => {
+        state.currentProductInventoryLoading = false;
+        state.currentProductInventory = null;
+        state.currentProductInventoryError = action.payload as string;
       });
   },
 });
 
-export const { clearErrors } = catalogSlice.actions;
+export const { clearErrors, clearCurrentInventory } = catalogSlice.actions;
 export default catalogSlice.reducer;

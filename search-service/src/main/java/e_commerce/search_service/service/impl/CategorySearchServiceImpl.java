@@ -1,7 +1,7 @@
 package e_commerce.search_service.service.impl;
 
+import e_commerce.common_shared.dtos.PageResponse;
 import e_commerce.search_service.document.CategoryDocument;
-import e_commerce.search_service.dto.PageResponse;
 import e_commerce.search_service.repository.CategorySearchRepository;
 import e_commerce.search_service.service.CategorySearchService;
 import lombok.RequiredArgsConstructor;

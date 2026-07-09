@@ -1,13 +1,9 @@
 package e_commerce.search_service.controller;
 
+import e_commerce.common_shared.dtos.PageResponse;
 import e_commerce.search_service.document.ProductDocument;
-import e_commerce.search_service.dto.PageResponse;
 import e_commerce.search_service.service.ProductSearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.*;
 
 @RestController

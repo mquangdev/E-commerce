@@ -1,3 +1,9 @@
+---
+trigger: always_on
+glob: "*"
+description: "Ràng buộc hành vi giao diện UI/UX và quy chuẩn xử lý các trạng thái API (Loading/Success/Error)"
+---
+
 # Đặc tả Quy chuẩn UI/UX & Các Trạng thái Giao diện (requirements.md)
 
 Tài liệu này đóng vai trò là hướng dẫn bắt buộc cho mọi hoạt động sinh mã (code generation) hoặc phát triển giao diện người dùng mới trong dự án E-commerce. Tất cả các trang và component phải tuân thủ nghiêm ngặt các quy tắc dưới đây.

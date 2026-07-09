@@ -9,6 +9,7 @@ import ProtectedRoute from './components/Common/ProtectedRoute';
 import { AdminLayout } from './components/Layout/AdminLayout';
 import { CategoryManagementPage } from './features/catalog/pages/CategoryManagementPage';
 import { ProductManagementPage } from './features/catalog/pages/ProductManagementPage';
+import { OrderManagementPage } from './features/order/pages/OrderManagementPage';
 import { useAppSelector } from './store/hooks';
 import { useEffect } from 'react';
 
@@ -66,6 +67,7 @@ function AppContent() {
               <Route index element={<DashboardPage />} />
               <Route path="admin/categories" element={<CategoryManagementPage />} />
               <Route path="admin/products" element={<ProductManagementPage />} />
+              <Route path="admin/orders" element={<OrderManagementPage />} />
             </Route>
 
             {/* Fallback redirection */}

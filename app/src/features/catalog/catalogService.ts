@@ -1,7 +1,17 @@
 import api from '@/services/api';
-import { CATALOG_BASE_URL, SEARCH_BASE_URL } from '@/constants/api.const';
+import { CATALOG_BASE_URL, SEARCH_BASE_URL, INVENTORY_BASE_URL } from '@/constants/api.const';
 import { Category, CategoryCreateRequest, CategoryUpdateRequest } from './models/Category';
 import { Product, ProductCreateRequest, ProductUpdateRequest } from './models/Product';
+
+export interface InventoryResponse {
+  id: string;
+  productId: string;
+  availableQuantity: number;
+  reservedQuantity: number;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export interface PageResponse<T> {
   content: T[];
@@ -73,4 +83,11 @@ export const updateProduct = async (
 
 export const deleteProduct = async (id: string): Promise<void> => {
   await api.delete(`${CATALOG_BASE_URL}/api/v1/products/${id}`);
+};
+
+export const getProductInventory = async (productId: string): Promise<InventoryResponse> => {
+  const response = await api.get<InventoryResponse>(
+    `${INVENTORY_BASE_URL}/api/v1/inventories/${productId}`
+  );
+  return response.data;
 };

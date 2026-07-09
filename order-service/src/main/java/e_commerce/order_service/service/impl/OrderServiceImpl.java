@@ -1,5 +1,6 @@
 package e_commerce.order_service.service.impl;
 
+import e_commerce.common_shared.dtos.PageResponse;
 import e_commerce.common_shared.exception.ResourceNotFoundException;
 import e_commerce.common_shared.grpc.catalog.ProductInfo;
 import e_commerce.order_service.dto.*;
@@ -17,6 +18,10 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -138,6 +143,18 @@ public class OrderServiceImpl implements OrderService {
     order.setStatus(status);
     OrderEntity saved = orderRepository.save(order);
     return mapToOrderResponse(saved);
+  }
+
+  @Override
+  @Transactional(readOnly = true)
+  public PageResponse<OrderResponse> getOrders(String keyword, int page, int size) {
+    Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "createdAt"));
+
+    Page<OrderEntity> orderPage =  orderRepository.searchOrders(keyword, pageable);
+
+    Page<OrderResponse> responsePage = orderPage.map(this::mapToOrderResponse);
+
+    return PageResponse.of(responsePage);
   }
 
   private OrderResponse mapToOrderResponse(OrderEntity entity) {

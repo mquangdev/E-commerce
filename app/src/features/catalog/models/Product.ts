@@ -30,5 +30,4 @@ export interface ProductUpdateRequest {
   description?: string;
   price: number;
   imageUrl?: string;
-  stockQuantity: number;
 }
