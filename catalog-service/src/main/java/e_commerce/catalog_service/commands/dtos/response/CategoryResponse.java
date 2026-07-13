@@ -1,4 +1,4 @@
-package e_commerce.catalog_service.commands.dtos;
+package e_commerce.catalog_service.commands.dtos.response;
 
 import java.time.LocalDate;
 import java.util.UUID;

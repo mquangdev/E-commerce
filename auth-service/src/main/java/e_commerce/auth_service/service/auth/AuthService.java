@@ -76,13 +76,7 @@ public class AuthService {
             .orElseThrow(() -> new UsernameNotFoundException("User not found"));
 
     // 3. Xử lý token cũ: Tìm token cũ của user trên thiết bị này và thu hồi
-    Optional<RefreshTokenEntity> oldTokenOpt =
-        refreshTokenRepository.findByUserAndDeviceIdAndIsRevokedFalse(user, request.getDeviceId());
-    if (oldTokenOpt.isPresent()) {
-      var oldToken = oldTokenOpt.get();
-      oldToken.setRevoked(true);
-      refreshTokenRepository.save(oldToken);
-    }
+    refreshTokenRepository.revokeAllTokenByUserAndDeviceId(user, request.getDeviceId());
 
     // 4. Tạo và lưu refresh token mới
     var refreshToken = UUID.randomUUID();

@@ -1,8 +1,8 @@
 package e_commerce.catalog_service.commands.controllers;
 
-import e_commerce.catalog_service.commands.dtos.CategoryCreateRequest;
-import e_commerce.catalog_service.commands.dtos.CategoryResponse;
-import e_commerce.catalog_service.commands.dtos.CategoryUpdateRequest;
+import e_commerce.catalog_service.commands.dtos.request.CategoryCreateRequest;
+import e_commerce.catalog_service.commands.dtos.response.CategoryResponse;
+import e_commerce.catalog_service.commands.dtos.request.CategoryUpdateRequest;
 import e_commerce.catalog_service.commands.services.CategoryCommandService;
 import jakarta.validation.Valid;
 import java.util.UUID;

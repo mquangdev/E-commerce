@@ -239,3 +239,22 @@ export const SampleManagementPage: React.FC = () => {
   - Khi thiết kế nhập danh sách sản phẩm động, tuyệt đối không lặp lại nhãn tiêu đề (label) cho từng dòng nhập liệu. Thay vào đó, hãy dựng một hàng tiêu đề (Header row) duy nhất ở đầu danh sách mặt hàng, sau đó xếp các Input (chọn sản phẩm, nhập đơn giá, nhập số lượng, nút xóa) thành một hàng ngang thẳng cột với tiêu đề.
   - Sử dụng thẻ `<Space align="baseline">` hoặc CSS flexbox để căn chỉnh cân đối các ô nhập liệu, không làm lệch độ cao giữa các trường.
 
+---
+
+## 7. Quy chuẩn Thiết kế Giao diện Đáp ứng (Responsive Design Rules)
+
+Để hệ thống hiển thị mượt mà trên tất cả thiết bị (Mobile, Tablet, Desktop):
+- **Bảng điều hướng Sider & Drawer**:
+  - Trên màn hình máy tính (`width >= 1024px` hoặc breakpoint `lg` của Tailwind), sử dụng Sidebar (`<Sider>`) cố định bên trái.
+  - Trên màn hình nhỏ (`width < 1024px`), ẩn hoàn toàn `<Sider>` (`className="hidden lg:block"`). Menu điều hướng lúc này phải được bọc trong một `<Drawer>` của Ant Design, kích hoạt đóng/mở qua nút hamburger menu ở Header. Nút hamburger chỉ hiển thị trên mobile/tablet (`className="lg:hidden"`).
+- **Phân phối Grid & Bố cục Form**:
+  - Mọi lưới hiển thị (Dashboard cards, Form Items) phải sử dụng cấu trúc đáp ứng. Tránh chỉ định số cột cố định cho grid mà không dùng responsive prefix.
+  - Ví dụ: `grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4`.
+  - Trên Form chính, các trường nhập liệu dài nên đặt mặc định chiếm toàn bộ chiều rộng dòng trên mobile (`col-span-12` hoặc `w-full`) và chia cột trên màn hình rộng (`md:col-span-6`).
+- **Thanh công cụ Toolbar & Bảng biểu**:
+  - Dòng điều khiển Tìm kiếm và Phân trang luôn sử dụng: `flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-4` để tự động kéo giãn hết chiều rộng và xếp chồng khi màn hình hẹp.
+  - Cụm nút hành động (dòng 2) sử dụng `flex flex-wrap gap-2` để tránh tràn lề màn hình.
+- **Tiết giảm chi tiết trên Header**:
+  - Các widget hiển thị phụ như số dư ví, thông tin tài khoản nên ẩn bớt nhãn chữ không cần thiết trên mobile (sử dụng class `hidden sm:inline`) để chừa chỗ cho các thành phần điều hướng chính.
+
+

@@ -1,4 +1,4 @@
-package e_commerce.catalog_service.commands.dtos;
+package e_commerce.catalog_service.commands.dtos.response;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

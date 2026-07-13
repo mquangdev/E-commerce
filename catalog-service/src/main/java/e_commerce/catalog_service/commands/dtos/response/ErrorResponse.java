@@ -1,4 +1,4 @@
-package e_commerce.catalog_service.commands.dtos;
+package e_commerce.catalog_service.commands.dtos.response;
 
 import java.time.LocalDateTime;
 import lombok.Builder;

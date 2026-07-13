@@ -31,6 +31,13 @@ public class CatalogEventListener {
         String eventType = afterNode.path("event_type").asText();
         String payloadString = afterNode.path("payload").asText();
         String aggregateId = afterNode.path("aggregate_id").asText();
+        JsonNode payloadNode = null;
+
+        try {
+          payloadNode = objectMapper.readTree(payloadString);
+        } catch (Exception e) {
+          System.err.println("Lỗi khi parse payload JSON: " + e.getMessage());
+        }
 
         // Lọc: Chỉ xử lý nếu sự kiện thuộc về bảng Categories
         if ("categories".equals(aggregateType)) {
@@ -71,18 +78,18 @@ public class CatalogEventListener {
               System.out.println("Không hỗ trợ loại sự kiện: " + eventType);
           }
         } else if ("products".equals(aggregateType)) {
+          JsonNode productNode = payloadNode.path("product");
+
           switch (eventType) {
             case "CREATE":
-              ProductDocument document =
-                  objectMapper.readValue(payloadString, ProductDocument.class);
+              ProductDocument document = objectMapper.treeToValue(productNode, ProductDocument.class);
               productSearchRepository.save(document);
               System.out.println("Đã tạo thành công Product vào ES: " + document.getName());
 
               clearRedisCacheProducts();
               break;
             case "UPDATE":
-              ProductDocument incomingDoc =
-                  objectMapper.readValue(payloadString, ProductDocument.class);
+              ProductDocument incomingDoc = objectMapper.treeToValue(productNode, ProductDocument.class);
               ProductDocument existingDoc =
                   productSearchRepository.findById(incomingDoc.getId()).orElse(null);
 

@@ -1,8 +1,9 @@
 package e_commerce.catalog_service.commands.controllers;
 
-import e_commerce.catalog_service.commands.dtos.ProductCreateRequest;
-import e_commerce.catalog_service.commands.dtos.ProductResponse;
-import e_commerce.catalog_service.commands.dtos.ProductUpdateRequest;
+import e_commerce.catalog_service.commands.dtos.request.ProductCreateRequest;
+import e_commerce.catalog_service.commands.dtos.request.ProductRecieveMoreInventoryRequest;
+import e_commerce.catalog_service.commands.dtos.response.ProductResponse;
+import e_commerce.catalog_service.commands.dtos.request.ProductUpdateRequest;
 import e_commerce.catalog_service.commands.services.ProductCommandService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -36,5 +37,11 @@ public class ProductCommandController {
   public ResponseEntity<Void> deleteProduct(@PathVariable UUID id) {
     productCommandService.deleteProduct(id);
     return ResponseEntity.noContent().build();
+  }
+
+  @PutMapping("/receiveMoreInventory/{id}")
+  public ResponseEntity<ProductResponse> receiveMoreInventory(@PathVariable UUID id, @Valid @RequestBody ProductRecieveMoreInventoryRequest request) {
+    ProductResponse response = productCommandService.receiveMoreInventory(id, request);
+    return ResponseEntity.ok(response);
   }
 }

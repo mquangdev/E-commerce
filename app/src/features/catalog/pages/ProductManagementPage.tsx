@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Card, Input, Button, Table, Pagination, Tag, Popconfirm, Space, Skeleton, Avatar, message } from 'antd';
-import { Search, Plus, Edit, Trash2, Image as ImageIcon, AlertTriangle, RotateCw, PackagePlus } from 'lucide-react';
+import { Typography, Card, Input, Button, Table, Pagination, Tag, Popconfirm, Space, Skeleton, Avatar, message, Upload } from 'antd';
+import { Search, Plus, Edit, Trash2, Image as ImageIcon, AlertTriangle, RotateCw, PackagePlus, Upload as UploadIcon, Download } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchProducts, deleteProductThunk } from '../catalogSlice';
+import { fetchProducts, deleteProductThunk, importProductsThunk, exportProductsThunk } from '../catalogSlice';
 import { Product } from '../models/Product';
 import { ProductModal } from '../components/ProductModal';
 import { ProductStockInModal } from '../components/ProductStockInModal';
@@ -16,6 +16,8 @@ export const ProductManagementPage: React.FC = () => {
     products,
     productsLoading: loading,
     productsTotal: totalElements,
+    productsImporting: importing,
+    productsExporting: exporting,
   } = useAppSelector((state) => state.catalog);
 
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -55,6 +57,34 @@ export const ProductManagementPage: React.FC = () => {
       loadProducts(debouncedSearch, currentPage, pageSize);
     } catch (error: any) {
       message.error(`Lỗi: ${error}`);
+    }
+  };
+
+  // Handle Import File
+  const handleImport = async (file: File) => {
+    try {
+      await dispatch(importProductsThunk(file)).unwrap();
+      message.success('Nhập sản phẩm từ file thành công!');
+      loadProducts(debouncedSearch, currentPage, pageSize);
+    } catch (error: any) {
+      message.error(`Nhập file thất bại: ${error}`);
+    }
+  };
+
+  // Handle Export File
+  const handleExport = async () => {
+    try {
+      const blob = await dispatch(exportProductsThunk()).unwrap();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'products_export.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      message.success('Xuất sản phẩm thành công!');
+    } catch (error: any) {
+      message.error(`Xuất file thất bại: ${error}`);
     }
   };
 
@@ -252,7 +282,7 @@ export const ProductManagementPage: React.FC = () => {
         </div>
 
         {/* Dòng 2: Cụm nút hành động - Căn trái */}
-        <div className="flex justify-start items-center gap-2 mb-6">
+        <div className="flex flex-wrap justify-start items-center gap-2 mb-6">
           <Button
             icon={<RotateCw size={16} />}
             onClick={() => {
@@ -269,6 +299,28 @@ export const ProductManagementPage: React.FC = () => {
             onClick={openCreateModal}
             className="h-10 w-10 rounded-xl flex items-center justify-center"
             title="Thêm sản phẩm"
+          />
+          <Upload
+            accept=".xlsx,.xls,.csv"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              handleImport(file);
+              return false;
+            }}
+          >
+            <Button
+              icon={<UploadIcon size={16} />}
+              loading={importing}
+              className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+              title="Nhập dữ liệu"
+            />
+          </Upload>
+          <Button
+            icon={<Download size={16} />}
+            onClick={handleExport}
+            loading={exporting}
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+            title="Xuất dữ liệu"
           />
         </div>
 

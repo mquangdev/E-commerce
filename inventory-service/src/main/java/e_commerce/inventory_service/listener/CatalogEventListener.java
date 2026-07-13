@@ -30,10 +30,10 @@ public class CatalogEventListener {
         String eventType = afterNode.path("event_type").asText();
         String aggregateId = afterNode.path("aggregate_id").asText();
         String payloadString = afterNode.path("payload").asText();
-        int stockQuantity = 0;
+        JsonNode payloadNode = null;
+
         try {
-          JsonNode payloadNode = objectMapper.readTree(payloadString);
-          stockQuantity = payloadNode.path("stockQuantity").asInt();
+          payloadNode = objectMapper.readTree(payloadString);
         } catch (Exception e) {
           System.err.println("Lỗi khi parse payload JSON: " + e.getMessage());
         }
@@ -44,6 +44,8 @@ public class CatalogEventListener {
           switch (eventType) {
             case "CREATE":
               if (!inventoryRepository.existsByProductId(productId)) {
+                int stockQuantity = payloadNode.path("stockQuantity").asInt();
+
                 InventoryEntity inventory = InventoryEntity.builder()
                     .productId(productId)
                     .availableQuantity(stockQuantity)
@@ -55,11 +57,13 @@ public class CatalogEventListener {
                 System.out.println("Tồn kho cho sản phẩm ID: " + productId + " đã tồn tại, bỏ qua khởi tạo.");
               }
               break;
-//            case "UPDATE":
-//              InventoryEntity inventory = inventoryRepository.findByProductId(productId).orElseThrow(() -> new BusinessException("Không có thông tin kho cho sản phẩm ID: " + productId));
-//              inventory.setAvailableQuantity(stockQuantity);
-//              inventoryRepository.save(inventory);
-//              System.out.println("Đã cập nhật tồn kho thành công cho sản phẩm ID: " + productId);
+            case "UPDATE":
+              // Update được bắn sang chỉ khi cập nhật nhận thêm stockQuantity
+              InventoryEntity inventory = inventoryRepository.findByProductId(productId).orElseThrow(() -> new BusinessException("Không có thông tin kho cho sản phẩm ID: " + productId));
+              int addedInventory = payloadNode.path("addedInventory").asInt();
+              inventory.setAvailableQuantity(inventory.getAvailableQuantity() + addedInventory);
+              inventoryRepository.save(inventory);
+              System.out.println("Đã cập nhật tồn kho thành công cho sản phẩm ID: " + productId);
             default:
               break;
           }

@@ -1,4 +1,4 @@
-package e_commerce.catalog_service.commands.dtos;
+package e_commerce.catalog_service.commands.dtos.request;
 
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.Min;
@@ -16,9 +16,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductUpdateRequest {
+public class ProductCreateRequest {
   @NotNull(message = "ID danh mục không được để trống")
   private UUID categoryId;
+
+  @NotBlank(message = "SKU sản phẩm không được để trống")
+  @Size(max = 50, message = "SKU không vượt quá 50 ký tự")
+  private String sku;
 
   @NotBlank(message = "Tên sản phẩm không được để trống")
   @Size(max = 255, message = "Tên sản phẩm không vượt quá 255 ký tự")
@@ -32,4 +36,7 @@ public class ProductUpdateRequest {
 
   @Size(max = 500, message = "Đường dẫn hình ảnh không vượt quá 500 ký tự")
   private String imageUrl;
+
+  @Min(value = 0, message = "Số lượng tồn kho không được nhỏ hơn 0")
+  private int stockQuantity;
 }

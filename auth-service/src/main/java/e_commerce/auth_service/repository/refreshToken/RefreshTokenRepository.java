@@ -23,6 +23,13 @@ public interface RefreshTokenRepository extends JpaRepository<RefreshTokenEntity
   @Modifying
   @Transactional
   @Query(
+          value = "UPDATE RefreshTokenEntity r SET r.isRevoked = true WHERE r.user = :user AND r.isRevoked = false AND r.deviceId = :deviceId"
+  )
+  void revokeAllTokenByUserAndDeviceId(UserEntity user, String deviceId);
+
+  @Modifying
+  @Transactional
+  @Query(
       value =
           "UPDATE RefreshTokenEntity r SET r.isRevoked = true WHERE r.user = :user AND r.isRevoked = false")
   void revokeAllTokenByUser(UserEntity user);

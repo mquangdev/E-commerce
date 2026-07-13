@@ -26,6 +26,12 @@ export const OrderModal: React.FC<OrderModalProps> = ({ visible, onClose, onSucc
   const items = Form.useWatch('items', form) || [];
 
   useEffect(() => {
+    return () => {
+      dispatch(resetCreateState());
+    }
+  }, [])
+
+  useEffect(() => {
     if (visible) {
       dispatch(resetCreateState());
       form.resetFields();
@@ -157,7 +163,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({ visible, onClose, onSucc
           {(fields, { add, remove }) => (
             <div className="space-y-3">
               {fields.length > 0 && (
-                <div className="grid grid-cols-12 gap-3 mb-1 px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
+                <div className="hidden sm:grid grid-cols-12 gap-3 mb-1 px-2 text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider">
                   <div className="col-span-6">Sản phẩm</div>
                   <div className="col-span-3">Đơn giá</div>
                   <div className="col-span-2">Số lượng</div>
@@ -170,7 +176,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({ visible, onClose, onSucc
                   key={key}
                   className="grid grid-cols-12 gap-3 items-center bg-slate-50/40 dark:bg-slate-900/10 p-2.5 rounded-2xl border border-slate-100 dark:border-slate-800"
                 >
-                  <div className="col-span-6">
+                  <div className="col-span-12 sm:col-span-6">
                     <Form.Item
                       {...restField}
                       name={[name, 'productId']}
@@ -193,7 +199,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({ visible, onClose, onSucc
                     </Form.Item>
                   </div>
 
-                  <div className="col-span-3">
+                  <div className="col-span-6 sm:col-span-3">
                     <Form.Item
                       {...restField}
                       name={[name, 'unitPrice']}
@@ -210,7 +216,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({ visible, onClose, onSucc
                     </Form.Item>
                   </div>
 
-                  <div className="col-span-2">
+                  <div className="col-span-4 sm:col-span-2">
                     <Form.Item
                       {...restField}
                       name={[name, 'quantity']}
@@ -221,7 +227,7 @@ export const OrderModal: React.FC<OrderModalProps> = ({ visible, onClose, onSucc
                     </Form.Item>
                   </div>
 
-                  <div className="col-span-1 flex justify-center items-center">
+                  <div className="col-span-2 sm:col-span-1 flex justify-center items-center">
                     {fields.length > 1 && (
                       <Button
                         type="text"

@@ -1,4 +1,4 @@
-package e_commerce.catalog_service.commands.dtos;
+package e_commerce.catalog_service.commands.dtos.request;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CategoryCreateRequest {
+public class CategoryUpdateRequest {
   @NotBlank(message = "Tên danh mục không được để trống")
   @Size(max = 100, message = "Tên danh mục không vượt quá 100 ký tự")
   private String name;

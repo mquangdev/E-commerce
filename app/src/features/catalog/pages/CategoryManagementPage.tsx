@@ -1,8 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Typography, Card, Input, Button, Table, Pagination, Tag, Popconfirm, Space, Skeleton, message } from 'antd';
-import { Search, Plus, Edit, Trash2, RotateCw } from 'lucide-react';
+import { Typography, Card, Input, Button, Table, Pagination, Tag, Popconfirm, Space, Skeleton, message, Upload } from 'antd';
+import { Search, Plus, Edit, Trash2, RotateCw, Upload as UploadIcon, Download } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
-import { fetchCategories, deleteCategoryThunk } from '../catalogSlice';
+import { fetchCategories, deleteCategoryThunk, importCategoriesThunk, exportCategoriesThunk } from '../catalogSlice';
 import { Category } from '../models/Category';
 import { CategoryModal } from '../components/CategoryModal';
 import { useDebounce } from '@/hooks/useDebounce';
@@ -15,6 +15,8 @@ export const CategoryManagementPage: React.FC = () => {
     categories,
     categoriesLoading: loading,
     categoriesTotal: totalElements,
+    categoriesImporting: importing,
+    categoriesExporting: exporting,
   } = useAppSelector((state) => state.catalog);
 
   const [searchKeyword, setSearchKeyword] = useState('');
@@ -54,6 +56,34 @@ export const CategoryManagementPage: React.FC = () => {
     }
   };
 
+  // Handle Import File
+  const handleImport = async (file: File) => {
+    try {
+      await dispatch(importCategoriesThunk(file)).unwrap();
+      message.success('Nhập danh mục từ file thành công!');
+      loadCategories(debouncedSearch, currentPage, pageSize);
+    } catch (error: any) {
+      message.error(`Nhập file thất bại: ${error}`);
+    }
+  };
+
+  // Handle Export File
+  const handleExport = async () => {
+    try {
+      const blob = await dispatch(exportCategoriesThunk()).unwrap();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'categories_export.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      link.parentNode?.removeChild(link);
+      message.success('Xuất danh mục thành công!');
+    } catch (error: any) {
+      message.error(`Xuất file thất bại: ${error}`);
+    }
+  };
+
   const openCreateModal = () => {
     setEditingCategory(null);
     setModalVisible(true);
@@ -75,11 +105,13 @@ export const CategoryManagementPage: React.FC = () => {
       dataIndex: 'name',
       key: 'name',
       className: 'font-semibold text-slate-800',
+      width: 200,
     },
     {
       title: 'Mô tả',
       dataIndex: 'description',
       key: 'description',
+      width: 300,
       render: (text: string) => text || <span className="text-slate-400 italic">Chưa có mô tả</span>,
     },
     {
@@ -110,7 +142,8 @@ export const CategoryManagementPage: React.FC = () => {
     {
       title: 'Hành động',
       key: 'actions',
-      width: 150,
+      width: 100,
+      fixed: 'right' as const,
       render: (_: any, record: Category) => (
         <Space size="middle">
           <Button
@@ -182,12 +215,12 @@ export const CategoryManagementPage: React.FC = () => {
         </div>
 
         {/* Dòng 2: Cụm nút hành động - Căn trái */}
-        <div className="flex justify-start items-center gap-2 mb-6">
+        <div className="flex flex-wrap justify-start items-center gap-2 mb-6">
           <Button
             icon={<RotateCw size={16} />}
             onClick={() => {
               loadCategories(debouncedSearch, currentPage, pageSize);
-              message.success('Đã làm mới danh mục sản phẩm!');
+              message.success('Đã làm mới danh sách danh mục!');
             }}
             loading={loading}
             className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
@@ -199,6 +232,28 @@ export const CategoryManagementPage: React.FC = () => {
             onClick={openCreateModal}
             className="h-10 w-10 rounded-xl flex items-center justify-center"
             title="Thêm danh mục"
+          />
+          <Upload
+            accept=".xlsx,.xls,.csv"
+            showUploadList={false}
+            beforeUpload={(file) => {
+              handleImport(file);
+              return false;
+            }}
+          >
+            <Button
+              icon={<UploadIcon size={16} />}
+              loading={importing}
+              className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+              title="Nhập dữ liệu"
+            />
+          </Upload>
+          <Button
+            icon={<Download size={16} />}
+            onClick={handleExport}
+            loading={exporting}
+            className="h-10 w-10 rounded-xl flex items-center justify-center text-slate-500 hover:text-slate-700 border-slate-200 transition-all duration-300"
+            title="Xuất dữ liệu"
           />
         </div>
 
@@ -214,6 +269,7 @@ export const CategoryManagementPage: React.FC = () => {
             rowKey="id"
             loading={loading}
             pagination={false}
+            scroll={{ x: 'max-content' }}
             className="border-slate-100 rounded-xl overflow-hidden"
           />
         )}

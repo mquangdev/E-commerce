@@ -6,13 +6,19 @@ import {
   createCategory,
   updateCategory,
   deleteCategory,
+  importCategories,
+  exportCategories,
   getProducts,
   createProduct,
   updateProduct,
   deleteProduct,
+  importProducts,
+  exportProducts,
   PageResponse,
   InventoryResponse,
   getProductInventory,
+  ProductReceiveMoreInventoryRequest,
+  receiveMoreInventory,
 } from './catalogService';
 
 export interface CatalogState {
@@ -22,6 +28,8 @@ export interface CatalogState {
   categoriesTotal: number;
   categoriesPages: number;
   categoriesPageNum: number;
+  categoriesImporting: boolean;
+  categoriesExporting: boolean;
 
   products: Product[];
   productsLoading: boolean;
@@ -29,6 +37,8 @@ export interface CatalogState {
   productsTotal: number;
   productsPages: number;
   productsPageNum: number;
+  productsImporting: boolean;
+  productsExporting: boolean;
 
   currentProductInventory: InventoryResponse | null;
   currentProductInventoryLoading: boolean;
@@ -42,6 +52,8 @@ const initialState: CatalogState = {
   categoriesTotal: 0,
   categoriesPages: 0,
   categoriesPageNum: 0,
+  categoriesImporting: false,
+  categoriesExporting: false,
 
   products: [],
   productsLoading: false,
@@ -49,6 +61,8 @@ const initialState: CatalogState = {
   productsTotal: 0,
   productsPages: 0,
   productsPageNum: 0,
+  productsImporting: false,
+  productsExporting: false,
 
   currentProductInventory: null,
   currentProductInventoryLoading: false,
@@ -105,6 +119,30 @@ export const deleteCategoryThunk = createAsyncThunk(
   }
 );
 
+export const importCategoriesThunk = createAsyncThunk(
+  'catalog/importCategories',
+  async (file: File, thunkAPI) => {
+    try {
+      await importCategories(file);
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Không thể nhập danh sách danh mục.';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const exportCategoriesThunk = createAsyncThunk(
+  'catalog/exportCategories',
+  async (_, thunkAPI) => {
+    try {
+      return await exportCategories();
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Không thể xuất danh sách danh mục.';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 // === PRODUCTS THUNKS ===
 export const fetchProducts = createAsyncThunk(
   'catalog/fetchProducts',
@@ -155,6 +193,21 @@ export const deleteProductThunk = createAsyncThunk(
   }
 );
 
+export const receiveMoreInventoryThunk = createAsyncThunk(
+  'catalog/receiveMoreInventory',
+  async (
+    { id, payload }: { id: string; payload: ProductReceiveMoreInventoryRequest },
+    thunkAPI
+  ) => {
+    try {
+      return await receiveMoreInventory(id, payload);
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Không thể nhập thêm sản phẩm.';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
 export const fetchProductInventory = createAsyncThunk(
   'catalog/fetchProductInventory',
   async (productId: string, thunkAPI) => {
@@ -162,6 +215,30 @@ export const fetchProductInventory = createAsyncThunk(
       return await getProductInventory(productId);
     } catch (error: any) {
       const message = error.response?.data?.message || 'Không thể tải thông tin tồn kho.';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const importProductsThunk = createAsyncThunk(
+  'catalog/importProducts',
+  async (file: File, thunkAPI) => {
+    try {
+      await importProducts(file);
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Không thể nhập danh sách sản phẩm.';
+      return thunkAPI.rejectWithValue(message);
+    }
+  }
+);
+
+export const exportProductsThunk = createAsyncThunk(
+  'catalog/exportProducts',
+  async (_, thunkAPI) => {
+    try {
+      return await exportProducts();
+    } catch (error: any) {
+      const message = error.response?.data?.message || 'Không thể xuất danh sách sản phẩm.';
       return thunkAPI.rejectWithValue(message);
     }
   }
@@ -230,6 +307,15 @@ const catalogSlice = createSlice({
         state.productsError = null;
       })
 
+      // Receive More Inventory
+      .addCase(receiveMoreInventoryThunk.fulfilled, (state, action: PayloadAction<Product>) => {
+        const index = state.products.findIndex((p) => p.id === action.payload.id);
+        if (index !== -1) {
+          state.products[index] = action.payload;
+        }
+        state.productsError = null;
+      })
+
       // Fetch Product Inventory
       .addCase(fetchProductInventory.pending, (state) => {
         state.currentProductInventoryLoading = true;
@@ -244,6 +330,62 @@ const catalogSlice = createSlice({
         state.currentProductInventoryLoading = false;
         state.currentProductInventory = null;
         state.currentProductInventoryError = action.payload as string;
+      })
+
+      // Import Categories
+      .addCase(importCategoriesThunk.pending, (state) => {
+        state.categoriesImporting = true;
+        state.categoriesError = null;
+      })
+      .addCase(importCategoriesThunk.fulfilled, (state) => {
+        state.categoriesImporting = false;
+        state.categoriesError = null;
+      })
+      .addCase(importCategoriesThunk.rejected, (state, action) => {
+        state.categoriesImporting = false;
+        state.categoriesError = action.payload as string;
+      })
+
+      // Export Categories
+      .addCase(exportCategoriesThunk.pending, (state) => {
+        state.categoriesExporting = true;
+        state.categoriesError = null;
+      })
+      .addCase(exportCategoriesThunk.fulfilled, (state) => {
+        state.categoriesExporting = false;
+        state.categoriesError = null;
+      })
+      .addCase(exportCategoriesThunk.rejected, (state, action) => {
+        state.categoriesExporting = false;
+        state.categoriesError = action.payload as string;
+      })
+
+      // Import Products
+      .addCase(importProductsThunk.pending, (state) => {
+        state.productsImporting = true;
+        state.productsError = null;
+      })
+      .addCase(importProductsThunk.fulfilled, (state) => {
+        state.productsImporting = false;
+        state.productsError = null;
+      })
+      .addCase(importProductsThunk.rejected, (state, action) => {
+        state.productsImporting = false;
+        state.productsError = action.payload as string;
+      })
+
+      // Export Products
+      .addCase(exportProductsThunk.pending, (state) => {
+        state.productsExporting = true;
+        state.productsError = null;
+      })
+      .addCase(exportProductsThunk.fulfilled, (state) => {
+        state.productsExporting = false;
+        state.productsError = null;
+      })
+      .addCase(exportProductsThunk.rejected, (state, action) => {
+        state.productsExporting = false;
+        state.productsError = action.payload as string;
       });
   },
 });

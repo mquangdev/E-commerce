@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, message } from 'antd';
 import { Product } from '../models/Product';
+import { useAppDispatch } from '@/store/hooks';
+import { receiveMoreInventoryThunk } from '../catalogSlice';
 
 interface ProductStockInModalProps {
   visible: boolean;
@@ -17,6 +19,7 @@ export const ProductStockInModal: React.FC<ProductStockInModalProps> = ({
 }) => {
   const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
+  const dispatch = useAppDispatch();
 
   useEffect(() => {
     if (visible) {
@@ -32,12 +35,17 @@ export const ProductStockInModal: React.FC<ProductStockInModalProps> = ({
   }, [visible, product, form]);
 
   const handleFinish = async (values: any) => {
+    if (!product) return;
     setLoading(true);
     try {
-      // Simulate API call to stock-in endpoint
-      await new Promise((resolve) => setTimeout(resolve, 600));
+      await dispatch(
+        receiveMoreInventoryThunk({
+          id: product.id,
+          payload: { addedInventory: values.quantity },
+        })
+      ).unwrap();
       
-      message.success(`Nhập thêm ${values.quantity} sản phẩm "${product?.name}" thành công!`);
+      message.success(`Nhập thêm ${values.quantity} sản phẩm "${product.name}" thành công!`);
       onSuccess();
     } catch (error: any) {
       message.error(`Lỗi: ${error}`);

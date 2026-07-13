@@ -53,6 +53,23 @@ export const deleteCategory = async (id: string): Promise<void> => {
   await api.delete(`${CATALOG_BASE_URL}/api/v1/categories/${id}`);
 };
 
+export const importCategories = async (file: File): Promise<void> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  await api.post(`${CATALOG_BASE_URL}/api/v1/categories/import`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+export const exportCategories = async (): Promise<Blob> => {
+  const response = await api.get(`${CATALOG_BASE_URL}/api/v1/categories/export`, {
+    responseType: 'blob',
+  });
+  return response.data;
+};
+
 // === PRODUCTS SERVICE ===
 export const getProducts = async (
   keyword: string,
@@ -89,5 +106,37 @@ export const getProductInventory = async (productId: string): Promise<InventoryR
   const response = await api.get<InventoryResponse>(
     `${INVENTORY_BASE_URL}/api/v1/inventories/${productId}`
   );
+  return response.data;
+};
+
+export interface ProductReceiveMoreInventoryRequest {
+  addedInventory: number;
+}
+
+export const receiveMoreInventory = async (
+  id: string,
+  payload: ProductReceiveMoreInventoryRequest
+): Promise<Product> => {
+  const response = await api.put<Product>(
+    `${CATALOG_BASE_URL}/api/v1/products/receiveMoreInventory/${id}`,
+    payload
+  );
+  return response.data;
+};
+
+export const importProducts = async (file: File): Promise<void> => {
+  const formData = new FormData();
+  formData.append('file', file);
+  await api.post(`${CATALOG_BASE_URL}/api/v1/products/import`, formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+  });
+};
+
+export const exportProducts = async (): Promise<Blob> => {
+  const response = await api.get(`${CATALOG_BASE_URL}/api/v1/products/export`, {
+    responseType: 'blob',
+  });
   return response.data;
 };

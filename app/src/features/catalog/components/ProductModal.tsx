@@ -234,7 +234,7 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
     return (
       <div className="pt-4 space-y-6">
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div className="bg-emerald-50/50 dark:bg-emerald-950/10 border border-emerald-100/80 dark:border-emerald-900/35 rounded-2xl p-5 shadow-sm text-center">
             <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 dark:text-emerald-450 block mb-1">
               Số lượng khả dụng
@@ -256,9 +256,15 @@ export const ProductModal: React.FC<ProductModalProps> = ({
 
         <div className="bg-slate-50/50 dark:bg-slate-900/30 p-5 rounded-2xl border border-slate-100/80 dark:border-slate-800 space-y-3.5 shadow-sm">
           <div className="flex justify-between items-baseline py-1 border-b border-slate-100/60 dark:border-slate-800/40">
-            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Tổng lượng tồn nhập vào ban đầu</span>
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Tổng lượng tồn nhập vào</span>
             <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
               {editingProduct ? editingProduct.stockQuantity.toLocaleString('vi-VN') : 0}
+            </span>
+          </div>
+          <div className="flex justify-between items-baseline py-1 border-b border-slate-100/60 dark:border-slate-800/40">
+            <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">Số lượng đã tiêu thụ</span>
+            <span className="text-sm font-bold text-slate-800 dark:text-slate-200">
+              {editingProduct ? (editingProduct.stockQuantity - currentProductInventory.availableQuantity).toLocaleString('vi-VN') : 0}
             </span>
           </div>
           <div className="flex justify-between items-baseline py-1">

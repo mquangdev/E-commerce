@@ -81,18 +81,6 @@ export const OrderManagementPage: React.FC = () => {
       ),
     },
     {
-      title: 'Mã KH (User ID)',
-      dataIndex: 'userId',
-      key: 'userId',
-      className: 'font-mono text-xs text-slate-500',
-      width: 150,
-      render: (userId: string) => (
-        <Tooltip title={userId}>
-          <span>{`${userId.substring(0, 8)}...`}</span>
-        </Tooltip>
-      ),
-    },
-    {
       title: 'Email khách hàng',
       dataIndex: 'email',
       key: 'email',
@@ -194,7 +182,7 @@ export const OrderManagementPage: React.FC = () => {
         </div>
 
         {/* Dòng 2: Cụm nút hành động - Căn trái */}
-        <div className="flex justify-start items-center gap-2 mb-6">
+        <div className="flex flex-wrap justify-start items-center gap-2 mb-6">
           <Button
             icon={<RotateCw size={16} />}
             onClick={handleReload}

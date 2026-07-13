@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Dropdown, Space, Avatar, Button, Breadcrumb, Badge, theme } from 'antd';
+import { Layout, Menu, Dropdown, Space, Avatar, Button, Breadcrumb, Badge, theme, Modal, Form, InputNumber, Spin, message, Drawer } from 'antd';
 import { Outlet, useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { logoutUser } from '@/features/auth/authSlice';
 import { toggleTheme } from '@/store/themeSlice';
+import { fetchWalletBalance, depositWalletThunk } from '@/features/payment/walletSlice';
 import {
   LayoutDashboard,
   FolderTree,
@@ -17,7 +18,9 @@ import {
   ShoppingBag,
   Bell,
   Sun,
-  Moon
+  Moon,
+  Wallet,
+  Plus
 } from 'lucide-react';
 
 const { Header, Sider, Content } = Layout;
@@ -30,6 +33,44 @@ export const AdminLayout: React.FC = () => {
 
   const darkMode = useAppSelector((state) => state.theme.darkMode);
   const { token } = theme.useToken();
+
+  const user = useAppSelector((state) => state.auth.user);
+  const { balance: walletBalance, loading: walletLoading } = useAppSelector((state) => state.wallet);
+
+  const [depositVisible, setDepositVisible] = useState(false);
+  const [depositLoading, setDepositLoading] = useState(false);
+  const [depositForm] = Form.useForm();
+  const [drawerVisible, setDrawerVisible] = useState(false);
+
+  const handleMobileMenuClick = ({ key }: { key: string }) => {
+    navigate(key);
+    setDrawerVisible(false);
+  };
+
+  React.useEffect(() => {
+    if (user?.userId) {
+      dispatch(fetchWalletBalance(user.userId));
+    }
+  }, [user, dispatch]);
+
+  const handleDepositSubmit = async (values: { amount: number }) => {
+    if (!user?.userId) return;
+    setDepositLoading(true);
+    try {
+      await dispatch(
+        depositWalletThunk({
+          userId: user.userId,
+          amount: values.amount,
+        })
+      ).unwrap();
+      message.success(`Nạp tiền vào ví thành công ${values.amount.toLocaleString('vi-VN')} đ!`);
+      setDepositVisible(false);
+    } catch (error: any) {
+      message.error(`Nạp tiền thất bại: ${error}`);
+    } finally {
+      setDepositLoading(false);
+    }
+  };
 
   const handleLogout = () => {
     dispatch(logoutUser());
@@ -116,7 +157,7 @@ export const AdminLayout: React.FC = () => {
         collapsed={collapsed}
         width={260}
         theme={darkMode ? 'dark' : 'light'}
-        className={`border-r shadow-sm transition-colors duration-200 ${darkMode ? 'border-slate-800' : 'border-slate-200/80'
+        className={`hidden lg:block border-r shadow-sm transition-colors duration-200 ${darkMode ? 'border-slate-800' : 'border-slate-200/80'
           }`}
       >
         <div className="flex flex-col h-full justify-between pb-4">
@@ -160,6 +201,48 @@ export const AdminLayout: React.FC = () => {
         </div>
       </Sider>
 
+      {/* Mobile Drawer Navigation */}
+      <Drawer
+        placement="left"
+        onClose={() => setDrawerVisible(false)}
+        open={drawerVisible}
+        width={260}
+        styles={{ body: { padding: 0 } }}
+        closable={false}
+        className={darkMode ? 'dark' : ''}
+        style={{
+          backgroundColor: darkMode ? '#141414' : '#ffffff',
+        }}
+      >
+        <div className="flex flex-col h-full justify-between pb-4">
+          <div>
+            {/* Brand Logo */}
+            <div className={`h-16 flex items-center px-6 border-b ${
+              darkMode ? 'border-slate-800' : 'border-slate-100'
+            } space-x-3 overflow-hidden`}>
+              <div className="bg-blue-600 p-2 rounded-xl text-white flex-shrink-0">
+                <ShoppingCart size={20} />
+              </div>
+              <span className={`text-base font-extrabold tracking-tight transition-all duration-300 whitespace-nowrap ${
+                darkMode ? 'text-slate-100' : 'text-slate-800'
+              }`}>
+                E-Commerce Admin
+              </span>
+            </div>
+
+            {/* Navigation Menu */}
+            <Menu
+              mode="inline"
+              theme={darkMode ? 'dark' : 'light'}
+              selectedKeys={[location.pathname]}
+              onClick={handleMobileMenuClick}
+              items={menuItems}
+              className="pt-4 border-none font-medium"
+            />
+          </div>
+        </div>
+      </Drawer>
+
       {/* Main Container Layout */}
       <Layout className="h-screen flex flex-col overflow-hidden">
         {/* Header */}
@@ -175,8 +258,8 @@ export const AdminLayout: React.FC = () => {
             <Button
               type="text"
               icon={<MenuIcon size={20} />}
-              onClick={() => setCollapsed(!collapsed)}
-              className="md:hidden flex items-center justify-center text-slate-600 hover:text-blue-600"
+              onClick={() => setDrawerVisible(true)}
+              className="lg:hidden flex items-center justify-center text-slate-600 hover:text-blue-600"
             />
             {/* Breadcrumbs */}
             <Breadcrumb items={getBreadcrumbs()} className="hidden sm:block text-xs font-medium" />
@@ -184,6 +267,35 @@ export const AdminLayout: React.FC = () => {
 
           {/* User Profile & Notifications */}
           <div className="flex items-center space-x-4 sm:space-x-6">
+            {/* Wallet Balance Widget */}
+            {user && (
+              <div className="flex items-center space-x-2 px-3 py-1.5 bg-blue-50/50 dark:bg-blue-950/20 border border-blue-100/50 dark:border-blue-900/30 rounded-xl text-blue-600 dark:text-blue-400 transition-colors">
+                <Wallet size={16} />
+                <span className="text-xs font-semibold hidden sm:inline">Ví:</span>
+                <span className="text-xs font-bold font-mono">
+                  {walletLoading && walletBalance === null ? (
+                    <Spin size="small" />
+                  ) : walletBalance !== null ? (
+                    `${walletBalance.toLocaleString('vi-VN')} đ`
+                  ) : (
+                    '0 đ'
+                  )}
+                </span>
+                <Button
+                  type="text"
+                  size="small"
+                  icon={<Plus size={12} />}
+                  onClick={() => {
+                    depositForm.resetFields();
+                    depositForm.setFieldsValue({ amount: 10000 });
+                    setDepositVisible(true);
+                  }}
+                  className="flex items-center justify-center text-blue-500 hover:text-blue-700 hover:bg-blue-100/50 dark:hover:bg-blue-900/40 p-0.5 rounded-md h-5 w-5 ml-1"
+                  title="Nạp tiền vào ví"
+                />
+              </div>
+            )}
+
             {/* Theme Toggle Button */}
             <Button
               type="text"
@@ -213,7 +325,9 @@ export const AdminLayout: React.FC = () => {
                   className="bg-blue-600 text-white flex items-center justify-center shadow-sm shadow-blue-500/20"
                 />
                 <div className="hidden md:flex flex-col text-left ml-2">
-                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight">Admin Portal</span>
+                  <span className="text-sm font-bold text-slate-800 dark:text-slate-200 leading-tight">
+                    {user?.fullName || 'Admin Portal'}
+                  </span>
                   <span className="text-xs text-slate-400 dark:text-slate-500 leading-none mt-0.5">Quản trị viên</span>
                 </div>
               </div>
@@ -228,6 +342,42 @@ export const AdminLayout: React.FC = () => {
           </div>
         </Content>
       </Layout>
+
+      {/* Deposit Modal */}
+      <Modal
+        title="Nạp tiền vào ví điện tử"
+        open={depositVisible}
+        onCancel={() => setDepositVisible(false)}
+        onOk={() => depositForm.submit()}
+        confirmLoading={depositLoading}
+        okText="Nạp tiền"
+        cancelText="Hủy bỏ"
+        width={360}
+      >
+        <Form
+          form={depositForm}
+          layout="vertical"
+          onFinish={handleDepositSubmit}
+          className="pt-4"
+        >
+          <Form.Item
+            name="amount"
+            label={<span className="font-semibold text-slate-700 text-xs">Số tiền nạp (VND)</span>}
+            rules={[
+              { required: true, message: 'Vui lòng nhập số tiền muốn nạp!' },
+              { type: 'number', min: 1000, message: 'Số tiền nạp tối thiểu là 1,000 đ!' },
+            ]}
+          >
+            <InputNumber
+              className="w-full h-10 rounded-xl"
+              placeholder="Nhập số tiền nạp"
+              min={1000}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={(value) => value!.replace(/\$\s?|(,*)/g, '')}
+            />
+          </Form.Item>
+        </Form>
+      </Modal>
     </Layout>
   );
 };

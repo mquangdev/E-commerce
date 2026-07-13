@@ -3,6 +3,7 @@ import authReducer from '@/features/auth/authSlice';
 import themeReducer from './themeSlice';
 import catalogReducer from '@/features/catalog/catalogSlice';
 import orderReducer from '@/features/order/orderSlice';
+import walletReducer from '@/features/payment/walletSlice';
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     theme: themeReducer,
     catalog: catalogReducer,
     order: orderReducer,
+    wallet: walletReducer,
   },
 });
 
