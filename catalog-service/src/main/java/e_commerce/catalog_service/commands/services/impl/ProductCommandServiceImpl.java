@@ -1,5 +1,6 @@
 package e_commerce.catalog_service.commands.services.impl;
 
+import e_commerce.catalog_service.commands.dtos.request.OutboxEventRequest;
 import e_commerce.catalog_service.commands.dtos.request.ProductCreateRequest;
 import e_commerce.catalog_service.commands.dtos.request.ProductRecieveMoreInventoryRequest;
 import e_commerce.catalog_service.commands.dtos.response.ProductResponse;
@@ -57,7 +58,14 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     Map<String, Object> eventPayload = new HashMap<>();
     ProductEntity saved = productRepository.save(product);
     eventPayload.put("product", mapToResponse(saved));
-    outboxEventService.insertOutboxEvent("CREATE", "products", saved.getId(), eventPayload);
+    outboxEventService.insertOutboxEvent(
+        OutboxEventRequest.builder()
+            .eventType("CREATE")
+            .aggregateType("products")
+            .aggregateId(saved.getId())
+            .payloadObj(eventPayload)
+            .build()
+    );
     return mapToResponse(saved);
   }
 
@@ -77,7 +85,14 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     product.setImageUrl(request.getImageUrl());
 
     ProductEntity saved = productRepository.save(product);
-    outboxEventService.insertOutboxEvent("UPDATE", "products", saved.getId(), mapToResponse(saved));
+    outboxEventService.insertOutboxEvent(
+        OutboxEventRequest.builder()
+            .eventType("UPDATE")
+            .aggregateType("products")
+            .aggregateId(saved.getId())
+            .payloadObj(mapToResponse(saved))
+            .build()
+    );
     return mapToResponse(saved);
   }
 
@@ -89,7 +104,13 @@ public class ProductCommandServiceImpl implements ProductCommandService {
 
     product.setDeleted(true);
     productRepository.save(product);
-    outboxEventService.insertOutboxEvent("DELETE", "products", id, null);
+    outboxEventService.insertOutboxEvent(
+        OutboxEventRequest.builder()
+            .eventType("DELETE")
+            .aggregateType("products")
+            .aggregateId(id)
+            .build()
+    );
   }
 
   @Override
@@ -105,7 +126,14 @@ public class ProductCommandServiceImpl implements ProductCommandService {
     eventPayload.put("product", mapToResponse(saved));
     eventPayload.put("addedInventory", addedInventory);
 
-    outboxEventService.insertOutboxEvent("UPDATE", "products", id, eventPayload);
+    outboxEventService.insertOutboxEvent(
+        OutboxEventRequest.builder()
+            .eventType("UPDATE")
+            .aggregateType("products")
+            .aggregateId(id)
+            .payloadObj(eventPayload)
+            .build()
+    );
     return null;
   }
 

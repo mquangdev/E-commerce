@@ -3,6 +3,7 @@ package e_commerce.catalog_service.commands.controllers;
 import e_commerce.catalog_service.commands.dtos.request.CategoryCreateRequest;
 import e_commerce.catalog_service.commands.dtos.response.CategoryResponse;
 import e_commerce.catalog_service.commands.dtos.request.CategoryUpdateRequest;
+import e_commerce.catalog_service.commands.dtos.response.ImportResultResponse;
 import e_commerce.catalog_service.commands.services.CategoryCommandService;
 import jakarta.validation.Valid;
 import java.util.UUID;
@@ -10,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -36,5 +38,17 @@ public class CategoryCommandController {
   public ResponseEntity<Void> deleteCategory(@PathVariable UUID id) {
     categoryCommandService.deleteCategory(id);
     return ResponseEntity.noContent().build();
+  }
+
+  @PostMapping("/import")
+  public ResponseEntity<ImportResultResponse> importCategories(@RequestParam("file") MultipartFile file) {
+    // 1. Check file exist
+    if (file.isEmpty()) {
+      return ResponseEntity.badRequest().body("Vui lòng tải file Excel hợp lệ lên hệ thống.");
+    }
+
+    return ResponseEntity.ok(
+            categoryCommandService.importExcelFile(file)
+    );
   }
 }

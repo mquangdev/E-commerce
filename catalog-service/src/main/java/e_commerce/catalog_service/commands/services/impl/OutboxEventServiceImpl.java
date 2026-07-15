@@ -1,9 +1,12 @@
 package e_commerce.catalog_service.commands.services.impl;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import e_commerce.catalog_service.commands.dtos.request.OutboxEventRequest;
 import e_commerce.catalog_service.commands.entities.OutboxEventEntity;
 import e_commerce.catalog_service.commands.repositories.OutboxEventRepository;
 import e_commerce.catalog_service.commands.services.OutboxEventService;
+
+import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,12 +22,11 @@ public class OutboxEventServiceImpl implements OutboxEventService {
 
   @Override
   @Transactional(propagation = Propagation.MANDATORY)
-  public void insertOutboxEvent(
-      String eventType, String aggregateType, UUID aggregateId, Object payloadObj) {
+  public void insertOutboxEvent(OutboxEventRequest request) {
     String payload = null;
-    if (payloadObj != null) {
+    if (request.getPayloadObj() != null) {
       try {
-        payload = objectMapper.writeValueAsString(payloadObj);
+        payload = objectMapper.writeValueAsString(request.getPayloadObj());
       } catch (Exception e) {
         // Log or handle JSON serialization exception
       }
@@ -32,12 +34,38 @@ public class OutboxEventServiceImpl implements OutboxEventService {
 
     OutboxEventEntity outboxEvent =
         OutboxEventEntity.builder()
-            .aggregateType(aggregateType)
-            .aggregateId(aggregateId)
-            .eventType(eventType)
+            .aggregateType(request.getAggregateType())
+            .aggregateId(request.getAggregateId())
+            .eventType(request.getEventType())
             .payload(payload)
             .build();
 
     outboxEventRepository.save(outboxEvent);
+  }
+
+  @Override
+  @Transactional(propagation = Propagation.MANDATORY)
+  public void batchInsertOutboxEvents(List<OutboxEventRequest> listRequest) {
+    if (listRequest == null || listRequest.isEmpty()) {
+      return;
+    }
+    List<OutboxEventEntity> entities = listRequest.stream().map(request -> {
+      String payload = null;
+      if (request.getPayloadObj() != null) {
+        try {
+          payload = objectMapper.writeValueAsString(request.getPayloadObj());
+        } catch (Exception e) {
+          // Log or handle JSON serialization exception
+        }
+      }
+      return OutboxEventEntity.builder()
+          .aggregateType(request.getAggregateType())
+          .aggregateId(request.getAggregateId())
+          .eventType(request.getEventType())
+          .payload(payload)
+          .build();
+    }).toList();
+
+    outboxEventRepository.saveAll(entities);
   }
 }

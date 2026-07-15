@@ -111,6 +111,11 @@
       <artifactId>common_shared</artifactId>
       <version>0.0.1-SNAPSHOT</version>
     </dependency>
+    <dependency>
+      <groupId>org.dhatim</groupId>
+      <artifactId>fastexcel-reader</artifactId>
+      <version>0.20.2</version>
+    </dependency>
   </dependencies>
   <dependencyManagement>
     <dependencies>
